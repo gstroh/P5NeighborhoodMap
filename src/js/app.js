@@ -1,19 +1,103 @@
 // myMapApp namespace to keep separate from outside js libraries.
-var myMapApp = myMapApp || { }; //myMapApp namespace
+var myMapApp = myMapApp || { };
 
-// see bottom of file for MVVM structure.
-$( function() {
-
+//
+myMapApp.viewModel = function() {
     // initialize some variables
+    var Jerusalem = new google.maps.LatLng(31.776347, 35.231446);
+    var service;
+    var infowindow;
+    var lat;
+    var lng;
     myMapApp.markers = [];
     myMapApp.query = ko.observable("");
+    myMapApp.CompleteList = ko.observableArray();
+
+
+    myMapApp.init = function() {
+
+      myMapApp.createMap();
+      myMapApp.getPlacesFromGoogleMaps();
+      myMapApp.getMapCenter();
+
+      // create the filtered list
+      myMapApp.FilteredList = ko.computed(function() {
+        var filter = myMapApp.query().toLowerCase();
+        if(myMapApp.query() === "") {
+            // return the complete list
+            return myMapApp.CompleteList();
+        } else {
+            return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
+              //find the filter string in the name
+              return item.name().toLowerCase().indexOf(filter)>-1;
+            });
+        }
+      });
+
+    };
+
+    myMapApp.getPlacesFromGoogleMaps = function () {
+
+      var request = {
+          location: Jerusalem,
+          radius: 3219,
+          types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
+      };
+
+      infowindow = new google.maps.InfoWindow();
+      service = new google.maps.places.PlacesService(myMapApp.map);
+      service.nearbySearch(request, callback);
+    };
+
+    function callback (results, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < results.length; i++) {
+          var place = results[i];
+          place.marker = myMapApp.setMapMarker(place);
+          bounds.extend(new google.maps.LatLng(
+            place.geometry.location.lat(),
+            place.geometry.location.lng()));
+        }
+        myMapApp.map.fitBounds(bounds);
+        results.forEach(myMapApp.getAllMapData);
+      } else {
+          console.error(status);
+          return;
+      }
+    };
+
+    myMapApp.getAllMapData = function(place) {
+
+      var myMapLocation = {};
+      myMapLocation.place_id = place.place_id;
+      myMapLocation.position = place.geometry.location.toString();
+      myMapLocation.name = place.name;
+
+      var address;
+      if (place.vicinity !== undefined) {
+        address = place.vicinity;
+      } else if (place.formatted_address !== undefined) {
+        address = place.formatted_address;
+      }
+      myMapLocation.address = address;
+
+      myMapApp.CompleteList.push(myMapLocation);
+    };
+
+
+    myMapApp.getMapCenter = function() {
+      var latLng = myMapApp.map.getCenter();
+      lat = latLng.lat();
+      lng = latLng.lng();
+    };
 
     // create the Google map
     myMapApp.createMap = function(){
         // set map options
         var myOptions = {
-            zoom: myMapApp.model.zoomLevel,
-            center: new google.maps.LatLng( myMapApp.model.centerCoordinates[0], myMapApp.model.centerCoordinates[1] ),
+            zoom: 16,
+            center: Jerusalem,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
@@ -33,18 +117,29 @@ $( function() {
     };
 
     // set a single map marker
-    myMapApp.setMapMarker = function ( category, name, lat, lon) {
+    myMapApp.setMapMarker = function ( place) {
 
         var marker = new google.maps.Marker({
-
-            position: new google.maps.LatLng(lat, lon),
-            title: name,
             map: myMapApp.map,
+            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+            position: place.geometry.location,
+            title: place.name,
+            place_id: place.place_id,
+            animation: google.maps.Animation.DROP,
             draggable: false
         });
 
         myMapApp.markers.push(marker);
 
+        var infoContent = place.name;
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent(infoContent);
+          infowindow.open(myMapApp.map, this);
+          map.panTo(marker.position);
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(function(){marker.setAnimation(null);}, 1450);
+        });
         // draging for the markers
         google.maps.event.addListener(marker, 'drag', function() {
             var pos = marker.getPosition();
@@ -58,6 +153,7 @@ $( function() {
             this.lon(pos.lng());
         }.bind(this));
 
+        return marker;
     };
 
     // set array item for each map location
@@ -72,7 +168,7 @@ $( function() {
     myMapApp.loadMap = function(item){
         console.log("LoadMap start");
         // initialize the complete list
-        myMapApp.CompleteList = ko.observableArray();
+        //myMapApp.CompleteList = ko.observableArray();
         // create the complete list of map locations
         for (var j = 0; j < item.length; j++){
             myMapApp.CompleteList.push( new myMapApp.setArray( item[j]['category'], item[j]['name'], item[j]['lat'], item[j]['lon']));
@@ -82,7 +178,6 @@ $( function() {
         // create the filtered list
         myMapApp.FilteredList = ko.computed(function() {
           var filter = myMapApp.query().toLowerCase();
-          console.log("*** myMapApp.FilteredList ko.computed");
           if(myMapApp.query() === "") {
               // return the complete list
               console.log("CompleteList =", myMapApp.CompleteList());
@@ -227,20 +322,25 @@ $( function() {
 
 // ------- View Model -------
 
-    myMapApp.viewModel = function() {
-        myMapApp.model();
-        myMapApp.view();
-    };
+    // myMapApp.viewModel = function() {
+    //     myMapApp.model();
+    //     myMapApp.view();
+    // };
 
 // ------- View -------
 
-    myMapApp.view = function (){
-        myMapApp.createMap();
-        console.log("B4 loadmap: ", myMapApp.model.geoCoordinates);
-        myMapApp.loadMap( myMapApp.model.geoCoordinates );
-    };
+    // myMapApp.view = function (){
+    //     myMapApp.createMap();
+    //     console.log("B4 loadmap: ", myMapApp.model.geoCoordinates);
+    //     myMapApp.loadMap( myMapApp.model.geoCoordinates );
+    // };
 
     // Apply Knockout bindings to the View Model.
-    ko.applyBindings(myMapApp.viewModel);
-    console.log("After ko.applyBindings: data.geoCoordinates", myMapApp.model.geoCoordinates);
+    //ko.applyBindings(myMapApp.viewModel);
+    //console.log("After ko.applyBindings: data.geoCoordinates", myMapApp.model.geoCoordinates);
+    google.maps.event.addDomListener(window, 'load', myMapApp.init);
+};
+
+$(function(){
+  ko.applyBindings(new myMapApp.viewModel());
 });
