@@ -127,11 +127,12 @@ myMapApp.viewModel = function() {
       console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
       console.log("myMapApp.ComputedList= ", myMapApp.ComputedList());
 
+      // Correct the list with the filtered places
       myMapApp.FilteredList.removeAll();
       for (var i = 0; i < myMapApp.ComputedList().length; i++) {
         myMapApp.FilteredList.push( myMapApp.ComputedList()[i] );
       }
-
+      // Correct the markers with the filtered locations
       myMapApp.deleteMarkers();
       for (var i = 0; i < myMapApp.FilteredList().length; i++) {
         myMapApp.setMapMarker(myMapApp.FilteredList()[i].place);
@@ -140,6 +141,33 @@ myMapApp.viewModel = function() {
       //myMapApp.FilteredList().removeAll;
       console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
     });
+
+    // Click on list item.
+
+    myMapApp.clickList = function(place) {
+      var marker;
+      console.log("myMapApp.markers = ", myMapApp.markers);
+      console.log("place = ", place);
+      console.log("place_id = ",place.place_id());
+      for(var i = 0; i < myMapApp.markers.length; i++) {
+        console.log(myMapApp.markers[i].place_id);
+        if(place.place_id() === myMapApp.markers[i].place_id) {
+          marker = myMapApp.markers[i];
+          break;
+        }
+      }
+      //self.getFoursquareInfo(place);
+      console.log("marker = ", marker);
+      myMapApp.map.panTo(marker.position);
+
+      // waits 300 milliseconds for the getFoursquare async function to finish
+      setTimeout(function() {
+        var contentString = place.name();
+        infowindow.setContent(contentString);
+        infowindow.open(myMapApp.map, marker);
+        marker.setAnimation(google.maps.Animation.DROP);
+      }, 300);
+    };
 
 
     myMapApp.getMapCenter = function() {
