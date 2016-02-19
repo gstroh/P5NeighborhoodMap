@@ -12,27 +12,17 @@ myMapApp.viewModel = function() {
     myMapApp.markers = [];
     myMapApp.query = ko.observable("");
     myMapApp.CompleteList = ko.observableArray();
+    myMapApp.FilteredList = ko.observableArray();
 
 
     myMapApp.init = function() {
 
+      console.log("init");
       myMapApp.createMap();
       myMapApp.getPlacesFromGoogleMaps();
       myMapApp.getMapCenter();
 
-      // create the filtered list
-      myMapApp.FilteredList = ko.computed(function() {
-        var filter = myMapApp.query().toLowerCase();
-        if(myMapApp.query() === "") {
-            // return the complete list
-            return myMapApp.CompleteList();
-        } else {
-            return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
-              //find the filter string in the name
-              return item.name().toLowerCase().indexOf(filter)>-1;
-            });
-        }
-      });
+      // move FilteredList code
 
     };
 
@@ -60,19 +50,43 @@ myMapApp.viewModel = function() {
             place.geometry.location.lng()));
         }
         myMapApp.map.fitBounds(bounds);
+        // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
       } else {
           console.error(status);
           return;
       }
+      //myMapApp.getFilteredList();
     };
 
+    myMapApp.getFilteredList = function(){
+      // create the filtered list
+      myMapApp.FilteredList = ko.computed(function() {
+        var filter = myMapApp.query().toLowerCase();
+        if (myMapApp.query() === "") {
+            console.log("No filter", filter);
+            // return the complete list
+            return myMapApp.CompleteList();
+        } else {
+            return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
+              //find the filter string in the name
+              return item.name().toLowerCase().indexOf(filter)>-1;
+            });
+        }
+      });
+      console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
+      console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
+    };
+
+
+    // create the Complete List of map data
     myMapApp.getAllMapData = function(place) {
 
+      console.log("getAllMapData", place);
       var myMapLocation = {};
-      myMapLocation.place_id = place.place_id;
-      myMapLocation.position = place.geometry.location.toString();
-      myMapLocation.name = place.name;
+      myMapLocation.place_id = ko.observable(place.place_id);
+      myMapLocation.position = ko.observable(place.geometry.location.toString());
+      myMapLocation.name = ko.observable(place.name);
 
       var address;
       if (place.vicinity !== undefined) {
@@ -80,10 +94,15 @@ myMapApp.viewModel = function() {
       } else if (place.formatted_address !== undefined) {
         address = place.formatted_address;
       }
-      myMapLocation.address = address;
-
+      myMapLocation.address = ko.observable(address);
+      //console.log("myMapLocation = ", myMapLocation);
       myMapApp.CompleteList.push(myMapLocation);
+      myMapApp.FilteredList.push(myMapLocation);
     };
+
+    myMapApp.query.subscribe (function(newValue) {
+      console.log("Search new value = ", newValue);
+    });
 
 
     myMapApp.getMapCenter = function() {
@@ -136,7 +155,7 @@ myMapApp.viewModel = function() {
         google.maps.event.addListener(marker, 'click', function() {
           infowindow.setContent(infoContent);
           infowindow.open(myMapApp.map, this);
-          map.panTo(marker.position);
+          myMapApp.map.panTo(marker.position);
           marker.setAnimation(google.maps.Animation.BOUNCE);
           setTimeout(function(){marker.setAnimation(null);}, 1450);
         });
@@ -342,5 +361,6 @@ myMapApp.viewModel = function() {
 };
 
 $(function(){
+  console.log("apply bindings");
   ko.applyBindings(new myMapApp.viewModel());
 });
