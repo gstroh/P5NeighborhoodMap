@@ -56,12 +56,61 @@ myMapApp.viewModel = function() {
           console.error(status);
           return;
       }
-      //myMapApp.getFilteredList();
     };
+
+    // NOT USED ANYMORE
 
     myMapApp.getFilteredList = function(){
       // create the filtered list
-      myMapApp.FilteredList = ko.computed(function() {
+      myMapApp.ComputedList = ko.computed(function() {
+        var filter = myMapApp.query().toLowerCase();
+        if (myMapApp.query() === "") {
+            console.log("No filter", filter);
+            // return the complete list
+            return myMapApp.CompleteList();
+        } else {
+            return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
+              //find the filter string in the name
+              return item.name().toLowerCase().indexOf(filter)>-1;
+            });
+        }
+      });
+      myMapApp.FilteredList = myMapApp.ComputedList;
+      console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
+      console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
+    };
+
+
+    // create the Complete List of map data
+    myMapApp.getAllMapData = function(place) {
+
+      console.log("getAllMapData", place);
+      var myMapLocation = {};
+      myMapLocation.place_id = ko.observable(place.place_id);
+      myMapLocation.position = ko.observable(place.geometry.location.toString());
+      myMapLocation.name = ko.observable(place.name);
+      myMapLocation.place = place;
+
+      var address;
+      if (place.vicinity !== undefined) {
+        address = place.vicinity;
+      } else if (place.formatted_address !== undefined) {
+        address = place.formatted_address;
+      }
+      myMapLocation.address = ko.observable(address);
+      //console.log("myMapLocation = ", myMapLocation);
+      myMapApp.CompleteList.push(myMapLocation);
+      myMapApp.FilteredList.push(myMapLocation);
+    };
+
+
+    // Filter
+
+    myMapApp.query.subscribe (function(newValue) {
+      console.log("Search new value = ", newValue);
+      console.log("B4 myMapApp.FilteredList= ", myMapApp.FilteredList());
+
+      myMapApp.ComputedList = ko.computed(function() {
         var filter = myMapApp.query().toLowerCase();
         if (myMapApp.query() === "") {
             console.log("No filter", filter);
@@ -76,32 +125,20 @@ myMapApp.viewModel = function() {
       });
       console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
       console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
-    };
+      console.log("myMapApp.ComputedList= ", myMapApp.ComputedList());
 
-
-    // create the Complete List of map data
-    myMapApp.getAllMapData = function(place) {
-
-      console.log("getAllMapData", place);
-      var myMapLocation = {};
-      myMapLocation.place_id = ko.observable(place.place_id);
-      myMapLocation.position = ko.observable(place.geometry.location.toString());
-      myMapLocation.name = ko.observable(place.name);
-
-      var address;
-      if (place.vicinity !== undefined) {
-        address = place.vicinity;
-      } else if (place.formatted_address !== undefined) {
-        address = place.formatted_address;
+      myMapApp.FilteredList.removeAll();
+      for (var i = 0; i < myMapApp.ComputedList().length; i++) {
+        myMapApp.FilteredList.push( myMapApp.ComputedList()[i] );
       }
-      myMapLocation.address = ko.observable(address);
-      //console.log("myMapLocation = ", myMapLocation);
-      myMapApp.CompleteList.push(myMapLocation);
-      myMapApp.FilteredList.push(myMapLocation);
-    };
 
-    myMapApp.query.subscribe (function(newValue) {
-      console.log("Search new value = ", newValue);
+      myMapApp.deleteMarkers();
+      for (var i = 0; i < myMapApp.FilteredList().length; i++) {
+        myMapApp.setMapMarker(myMapApp.FilteredList()[i].place);
+      }
+
+      //myMapApp.FilteredList().removeAll;
+      console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
     });
 
 
