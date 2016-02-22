@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jerusalem Map</title>
+  <link href="css/style.css" rel="stylesheet">
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqWwWFBAwW9nDwoWyDC9rNuPjO8QRl7z8&libraries=places"></script>
+  <script src="js/jQuery/jquery-2.1.3.min.js"></script>
+  <script src="js/knockout/knockout-3.4.0.js"></script>
+  <script src="js/app.js"></script>
+</head>
 
-  <head>
-    <!--<script data-require="jquery@2.1.3" data-semver="2.1.3" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script data-require="knockout@*" data-semver="3.3.0" src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>-->
-    <link href="css/style.css" rel="stylesheet">
-    <!--<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>-->
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqWwWFBAwW9nDwoWyDC9rNuPjO8QRl7z8&libraries=places"></script>
-    <script src="js/jQuery/jquery-2.1.3.min.js"></script>
-    <script src="js/knockout/knockout-3.4.0.js"></script>
-    <script src="js/app.js"></script>
-  </head>
+<body>
+  <header>
+    <input id="search" placeholder="Enter search criteria ..." type="search" data-bind="value: myMapApp.query, valueUpdate: 'keyup'" autocomplete="off">
+  </header>
 
-  <body>
-
-    <header>
-        <form action="#">
-            <input class="search" placeholder="Search…" type="search" name="q" data-bind="value: myMapApp.query, valueUpdate: 'keyup'" autocomplete="off">
-        </form>
-    </header>
-
-    <h2>Filtered List</h2>
-    <div class="content">
-        <ul data-bind="template: {name:'site', foreach:myMapApp.FilteredList}">
+  <h2>Filtered List</h2>
+  <div>
+    <div id="list">
+        <ul data-bind="template: {name:'listTemplate', foreach:myMapApp.FilteredList}" data-role="listview">
         </ul>
     </div>
 
-     <script type="text/html" id="site">
-      <li data-bind="click: myMapApp.clickList">
-        <span data-bind="text:name"></span>
-      </li>
-    </script>
+  </div>
 
-    <div id="map"></div>
+  <!-- This is a knockout template used for the filtered list of map location -->
+  <script type="text/html" id="listTemplate">
+   <li data-bind="click: myMapApp.clickList">
+   <hr>
+     <p class="name"><span data-bind="text:name"></span></p>
+   </li>
+  </script>
 
-  </body>
+  <div id="map"></div>
 
+</body>
 </html>
