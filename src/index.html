@@ -12,17 +12,18 @@
 </head>
 
 <body>
-  <header>
+  <!-- Map Area -->
+  <div id="map" class="mapArea"></div>
+  <!-- Search bar and list of filtered locations -->
+  <div id="searchMap">
     <input id="search" placeholder="Enter search criteria ..." type="search" data-bind="value: myMapApp.query, valueUpdate: 'keyup'" autocomplete="off">
-  </header>
-
-  <h2>Filtered List</h2>
-  <div>
-    <div id="list">
-        <ul data-bind="template: {name:'listTemplate', foreach:myMapApp.FilteredList}" data-role="listview">
-        </ul>
-    </div>
-
+    <img class="headerMenu" src="images/menu.svg" alt="menu">
+    <nav id="drawer" class="nav">
+      <div id="list">
+          <ul data-bind="template: {name:'listTemplate', foreach:myMapApp.FilteredList}" data-role="listview">
+          </ul>
+      </div>
+    </nav>
   </div>
 
   <!-- This is a knockout template used for the filtered list of map location -->
@@ -32,8 +33,6 @@
      <p class="name"><span data-bind="text:name"></span></p>
    </li>
   </script>
-
-  <div id="map"></div>
 
 </body>
 </html>
