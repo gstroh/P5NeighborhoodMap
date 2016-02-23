@@ -14,10 +14,11 @@
 <body>
   <!-- Map Area -->
   <div id="map" class="mapArea"></div>
+  <!-- hamburger menu icon for small devices -->
+  <img id="menu" class="headerMenu" src="images/menu.svg" alt="menu">
   <!-- Search bar and list of filtered locations -->
   <div id="searchMap">
     <input id="search" placeholder="Enter search criteria ..." type="search" data-bind="value: myMapApp.query, valueUpdate: 'keyup'" autocomplete="off">
-    <img class="headerMenu" src="images/menu.svg" alt="menu">
     <nav id="drawer" class="nav">
       <div id="list">
           <ul data-bind="template: {name:'listTemplate', foreach:myMapApp.FilteredList}" data-role="listview">
@@ -33,6 +34,17 @@
      <p class="name"><span data-bind="text:name"></span></p>
    </li>
   </script>
+
+  <script>
+      /* Open the drawer when the menu icon is clicked. */
+      var menu = document.querySelector('#menu');
+      var drawer = document.querySelector('.nav');
+
+      menu.addEventListener('click', function(e) {
+        drawer.classList.toggle('open');
+        e.stopPropagation();
+      });
+    </script>
 
 </body>
 </html>

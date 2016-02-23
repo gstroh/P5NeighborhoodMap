@@ -62,38 +62,83 @@ hr {
 #searchMap {
   position: absolute;
   width: 95%;
-  max-width: 400px;
-  min-width: 320px;
+  /*max-width: 400px;
+  min-width: 320px;*/
+  max-width: 200px;
+  min-width: 100px;
   margin: 1% 0 0 2%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   font-family: Roboto,Arial,sans-serif;
   font-size: 11px;
+  height: 100%;
+  overflow: auto;
 }
+
+/*.nav {
+	width: 95%;
+  	height: 100%;
+  	overflow: auto;
+}*/
 
 #list {
     background: rgba(255, 255, 255, 0.8);
   	margin: 0;
   	border: 1px solid rgba(0, 0, 0, 0.1);
+  	padding: 0px;
 }
 
 @media screen and (max-width: 400px) {
-    #search {
-        width: 90%;
+    #searchMap {
+        width: 5%;
     }
-    #search:focus {
+    /*#search:focus {
         width: 91%;
+    }*/
+
+    .nav {
+    z-index: 10;
+    position: absolute;
+    /* This trasform moves the drawer off canvas. */
+    -webkit-transform: translate(-300px, 0);
+    transform: translate(-300px, 0);
+    /* Optionally, we animate the drawer. */
+    transition: transform 0.3s ease;
+  	}
+  	.nav.open {
+    	-webkit-transform: translate(0, 0);
+    	transform: translate(0, 0);
+  	}
+  	.headerMenu {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    padding: 1em;
+  }
+  .headerMenu svg {
+    width: 32px;
+    fill: #E0E0E0;
+  }
+}
+
+@media screen and (min-width: 401px) {
+
+    #searchMap {
+    	width: 30%;
     }
 }
 
 @media screen and (min-width: 700px) {
-  .nav {
+	#searchMap {
+		width: 35%;
+	}
+  /*.nav {
   	order: 0;
     width: 30%;
   }
   .mapArea {
     order: 1;
     width: 100%;
-  }
+  }*/
 }
 
 #search {
@@ -101,10 +146,10 @@ hr {
     font-family: Roboto;
     font-size: 15px;
     font-weight: 300;
-    margin-left: 12px;
+    margin-left: 0px;
     padding: 0 11px 0 13px;
     text-overflow: ellipsis;
-    width: 300px;
+    width: 100%;
 }
 
 #search:focus {

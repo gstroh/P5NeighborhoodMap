@@ -36,10 +36,10 @@ myMapApp.viewModel = function() {
 
       infowindow = new google.maps.InfoWindow();
       service = new google.maps.places.PlacesService(myMapApp.map);
-      service.nearbySearch(request, callback);
+      service.nearbySearch(request, processGoogleResults);
     };
 
-    function callback (results, status) {
+    function processGoogleResults (results, status, pagination) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < results.length; i++) {
@@ -52,10 +52,16 @@ myMapApp.viewModel = function() {
         myMapApp.map.fitBounds(bounds);
         // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
+        // process multiple pages
+        if (pagination.hasNextPage) {
+          console.log("pagination");
+          pagination.nextPage();
+        }
       } else {
           console.error(status);
           return;
       }
+      console.log("myMapApp.markers = ", myMapApp.markers);
     };
 
     // NOT USED ANYMORE
@@ -84,7 +90,7 @@ myMapApp.viewModel = function() {
     // create the Complete List of map data
     myMapApp.getAllMapData = function(place) {
 
-      console.log("getAllMapData", place);
+      //console.log("getAllMapData", place);
       var myMapLocation = {};
       myMapLocation.place_id = ko.observable(place.place_id);
       myMapLocation.position = ko.observable(place.geometry.location.toString());
@@ -202,7 +208,7 @@ myMapApp.viewModel = function() {
 
     // set a single map marker
     myMapApp.setMapMarker = function ( place) {
-
+        console.log("setMapMarker");
         var marker = new google.maps.Marker({
             map: myMapApp.map,
             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
@@ -218,6 +224,7 @@ myMapApp.viewModel = function() {
         var infoContent = place.name;
 
         google.maps.event.addListener(marker, 'click', function() {
+          console.log("click marker");
           infowindow.setContent(infoContent);
           infowindow.open(myMapApp.map, this);
           myMapApp.map.panTo(marker.position);
@@ -424,6 +431,7 @@ myMapApp.viewModel = function() {
     //console.log("After ko.applyBindings: data.geoCoordinates", myMapApp.model.geoCoordinates);
     google.maps.event.addDomListener(window, 'load', myMapApp.init);
 };
+
 
 $(function(){
   console.log("apply bindings");
