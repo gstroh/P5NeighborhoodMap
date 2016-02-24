@@ -96,13 +96,15 @@ myMapApp.viewModel = function() {
       myMapLocation.position = ko.observable(place.geometry.location.toString());
       myMapLocation.name = ko.observable(place.name);
       myMapLocation.place = place;
+      myMapLocation.types = place.types;
 
       var address;
-      if (place.vicinity !== undefined) {
-        address = place.vicinity;
-      } else if (place.formatted_address !== undefined) {
-        address = place.formatted_address;
-      }
+      address = myMapApp.setAddress(place);
+      // if (place.vicinity !== undefined) {
+      //   address = place.vicinity;
+      // } else if (place.formatted_address !== undefined) {
+      //   address = place.formatted_address;
+      // }
       myMapLocation.address = ko.observable(address);
       //console.log("myMapLocation = ", myMapLocation);
       myMapApp.CompleteList.push(myMapLocation);
@@ -148,34 +150,6 @@ myMapApp.viewModel = function() {
       console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
     });
 
-    // Click on list item.
-
-    myMapApp.clickList = function(place) {
-      var marker;
-      console.log("myMapApp.markers = ", myMapApp.markers);
-      console.log("place = ", place);
-      console.log("place_id = ",place.place_id());
-      for(var i = 0; i < myMapApp.markers.length; i++) {
-        console.log(myMapApp.markers[i].place_id);
-        if(place.place_id() === myMapApp.markers[i].place_id) {
-          marker = myMapApp.markers[i];
-          break;
-        }
-      }
-      //self.getFoursquareInfo(place);
-      console.log("marker = ", marker);
-      myMapApp.map.panTo(marker.position);
-
-      // waits 300 milliseconds for the getFoursquare async function to finish
-      setTimeout(function() {
-        var contentString = place.name();
-        infowindow.setContent(contentString);
-        infowindow.open(myMapApp.map, marker);
-        marker.setAnimation(google.maps.Animation.DROP);
-      }, 300);
-    };
-
-
     myMapApp.getMapCenter = function() {
       var latLng = myMapApp.map.getCenter();
       lat = latLng.lat();
@@ -206,8 +180,59 @@ myMapApp.viewModel = function() {
         myMapApp.markers = [];
     };
 
+    // Click on list item.
+
+    myMapApp.clickList = function(place) {
+      var marker;
+      console.log("myMapApp.markers = ", myMapApp.markers);
+      console.log("place = ", place);
+      console.log("place_id = ",place.place_id());
+      for(var i = 0; i < myMapApp.markers.length; i++) {
+        console.log(myMapApp.markers[i].place_id);
+        if(place.place_id() === myMapApp.markers[i].place_id) {
+          marker = myMapApp.markers[i];
+          break;
+        }
+      }
+      //self.getFoursquareInfo(place);
+      console.log("marker = ", marker);
+      myMapApp.map.panTo(marker.position);
+
+      // waits 300 milliseconds for the getFoursquare async function to finish
+      setTimeout(function() {
+        // var contentString = place.name();
+        // infowindow.setContent(contentString);
+        // infowindow.open(myMapApp.map, marker);
+        // marker.setAnimation(google.maps.Animation.DROP);
+        var placeName = place.name();
+        var placeAddress = place.address();
+        var placeType = place.types[1];
+        console.log("clickList place = ", place);
+        myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
+
+      }, 300);
+    };
+
+    myMapApp.displayInfoWindow = function (placeName, placeAddress, placeType, marker) {
+
+      var photoURL = " ";
+      //var infoContent = placeName;
+      var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
+        + '<br>' + placeType + '<br>' + "<img width='80' src=" +
+        photoURL + ">" ;
+      console.log("infocontent = ", infoContent);
+      infowindow.setContent(infoContent);
+      console.log("infowindow.open");
+      infowindow.open(myMapApp.map, marker);
+      console.log("panto");
+      myMapApp.map.panTo(marker.position);
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function(){marker.setAnimation(null);}, 1450);
+      console.log("Completed displayInfoWindow");
+    }
+
     // set a single map marker
-    myMapApp.setMapMarker = function ( place) {
+    myMapApp.setMapMarker = function (place) {
         console.log("setMapMarker");
         var marker = new google.maps.Marker({
             map: myMapApp.map,
@@ -216,35 +241,65 @@ myMapApp.viewModel = function() {
             title: place.name,
             place_id: place.place_id,
             animation: google.maps.Animation.DROP,
-            draggable: false
+            draggable: false,
+            types: place.types
         });
 
         myMapApp.markers.push(marker);
 
-        var infoContent = place.name;
+        // var photoURL = " ";
+        // //var infoContent = place.name;
+        // var infoContent = "<a>" + place.name + "</a>" + '<br>' + place.address
+        //   + '<br>' + place.types[1] + '<br>' + "<img width='80' src=" +
+        //   photoURL + ">" ;
+
+        // click on a Google Maps marker
 
         google.maps.event.addListener(marker, 'click', function() {
-          console.log("click marker");
-          infowindow.setContent(infoContent);
-          infowindow.open(myMapApp.map, this);
-          myMapApp.map.panTo(marker.position);
-          marker.setAnimation(google.maps.Animation.BOUNCE);
-          setTimeout(function(){marker.setAnimation(null);}, 1450);
+          console.log("click Marker place = ", place);
+
+          // var address;
+          // if (place.vicinity !== undefined) {
+          //   address = place.vicinity;
+          // } else if (place.formatted_address !== undefined) {
+          //   address = place.formatted_address;
+          // }
+
+          var placeName = place.name;
+          var placeAddress = myMapApp.setAddress(place);
+          var placeType = place.types[1];
+          myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
+          // console.log("click marker");
+          // infowindow.setContent(infoContent);
+          // infowindow.open(myMapApp.map, this);
+          // myMapApp.map.panTo(marker.position);
+          // marker.setAnimation(google.maps.Animation.BOUNCE);
+          // setTimeout(function(){marker.setAnimation(null);}, 1450);
         });
         // draging for the markers
-        google.maps.event.addListener(marker, 'drag', function() {
-            var pos = marker.getPosition();
-            this.lat(pos.lat());
-            this.lon(pos.lng());
-        }.bind(this));
+        //
+        //mouse over event for this point's marker
+        // google.maps.event.addListener(marker, 'mouseover', function() {
+        //     self.mouseHere(this);
+        // }.bind(this));
 
-        google.maps.event.addListener(marker, 'dragend', function() {
-            var pos = marker.getPosition();
-            this.lat(pos.lat());
-            this.lon(pos.lng());
-        }.bind(this));
+        //mouse out event for  this point's marker
+        // google.maps.event.addListener(marker, 'mouseout', function() {
+        //     self.mouseGone(this);
+        // }.bind(this));
 
         return marker;
+    };
+
+    // set array item for each map location
+    myMapApp.setAddress = function (place) {
+        var address;
+          if (place.vicinity !== undefined) {
+            address = place.vicinity;
+          } else if (place.formatted_address !== undefined) {
+            address = place.formatted_address;
+          }
+          return address;
     };
 
     // set array item for each map location
