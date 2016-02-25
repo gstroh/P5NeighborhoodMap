@@ -4,6 +4,7 @@ var myMapApp = myMapApp || { };
 //
 myMapApp.viewModel = function() {
     // initialize some variables
+    console.log("viewModel");
     var Jerusalem = new google.maps.LatLng(31.776347, 35.231446);
     var service;
     var infowindow;
@@ -13,6 +14,7 @@ myMapApp.viewModel = function() {
     myMapApp.query = ko.observable("");
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
+    myMapApp.flickrPhotos = [];
 
 
     myMapApp.init = function() {
@@ -53,15 +55,15 @@ myMapApp.viewModel = function() {
         // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
         // process multiple pages
-        if (pagination.hasNextPage) {
-          console.log("pagination");
-          pagination.nextPage();
-        }
+        // if (pagination.hasNextPage) {
+        //   //console.log("pagination");
+        //   pagination.nextPage();
+        // }
       } else {
           console.error(status);
           return;
       }
-      console.log("myMapApp.markers = ", myMapApp.markers);
+      //console.log("myMapApp.markers = ", myMapApp.markers);
     };
 
     // NOT USED ANYMORE
@@ -82,14 +84,14 @@ myMapApp.viewModel = function() {
         }
       });
       myMapApp.FilteredList = myMapApp.ComputedList;
-      console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
-      console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
+      //console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
+      //console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
     };
 
 
     // create the Complete List of map data
     myMapApp.getAllMapData = function(place) {
-
+      // Google place input param
       //console.log("getAllMapData", place);
       var myMapLocation = {};
       myMapLocation.place_id = ko.observable(place.place_id);
@@ -109,19 +111,29 @@ myMapApp.viewModel = function() {
       //console.log("myMapLocation = ", myMapLocation);
       myMapApp.CompleteList.push(myMapLocation);
       myMapApp.FilteredList.push(myMapLocation);
+      // Add flickr data to data structure
+      //console.log("place", place);
+      var lat = place.geometry.location.lat();
+      var lon = place.geometry.location.lng();
+      var placeName = place.name;
+      var placeID = place.place_id;
+      //console.log("lat = ", lat);
+      //console.log("marker = ", marker);
+
+      myMapApp.getFlickrPhotos(lat, lon, placeName, placeID);
     };
 
 
     // Filter
 
     myMapApp.query.subscribe (function(newValue) {
-      console.log("Search new value = ", newValue);
-      console.log("B4 myMapApp.FilteredList= ", myMapApp.FilteredList());
+      //console.log("Search new value = ", newValue);
+      //console.log("B4 myMapApp.FilteredList= ", myMapApp.FilteredList());
 
       myMapApp.ComputedList = ko.computed(function() {
         var filter = myMapApp.query().toLowerCase();
         if (myMapApp.query() === "") {
-            console.log("No filter", filter);
+            //console.log("No filter", filter);
             // return the complete list
             return myMapApp.CompleteList();
         } else {
@@ -131,9 +143,9 @@ myMapApp.viewModel = function() {
             });
         }
       });
-      console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
-      console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
-      console.log("myMapApp.ComputedList= ", myMapApp.ComputedList());
+      //console.log("myMapApp.CompleteList= ", myMapApp.CompleteList());
+      //console.log("myMapApp.FilteredList= ", myMapApp.FilteredList());
+      //console.log("myMapApp.ComputedList= ", myMapApp.ComputedList());
 
       // Correct the list with the filtered places
       myMapApp.FilteredList.removeAll();
@@ -147,7 +159,7 @@ myMapApp.viewModel = function() {
       }
 
       //myMapApp.FilteredList().removeAll;
-      console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
+      //console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
     });
 
     myMapApp.getMapCenter = function() {
@@ -184,18 +196,18 @@ myMapApp.viewModel = function() {
 
     myMapApp.clickList = function(place) {
       var marker;
-      console.log("myMapApp.markers = ", myMapApp.markers);
-      console.log("place = ", place);
-      console.log("place_id = ",place.place_id());
+      //console.log("myMapApp.markers = ", myMapApp.markers);
+      //console.log("place = ", place);
+      //console.log("place_id = ",place.place_id());
       for(var i = 0; i < myMapApp.markers.length; i++) {
-        console.log(myMapApp.markers[i].place_id);
+        //console.log(myMapApp.markers[i].place_id);
         if(place.place_id() === myMapApp.markers[i].place_id) {
           marker = myMapApp.markers[i];
           break;
         }
       }
       //self.getFoursquareInfo(place);
-      console.log("marker = ", marker);
+      //console.log("marker = ", marker);
       myMapApp.map.panTo(marker.position);
 
       // waits 300 milliseconds for the getFoursquare async function to finish
@@ -207,33 +219,202 @@ myMapApp.viewModel = function() {
         var placeName = place.name();
         var placeAddress = place.address();
         var placeType = place.types[1];
-        console.log("clickList place = ", place);
+        //var placePhotos = place.flickrPhotos;
+        //console.log("clickList place = ", place);
         myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
 
       }, 300);
     };
 
+
+
+
+
+    // create the Google Maps inforwindow.
+
     myMapApp.displayInfoWindow = function (placeName, placeAddress, placeType, marker) {
 
       var photoURL = " ";
+      var photoImages = [];
+      console.log("marker = ", marker);
+
+      for(var i = 0; i < myMapApp.flickrPhotos.length; i++) {
+        //console.log(myMapApp.markers[i].place_id);
+        if(marker.place_id === myMapApp.flickrPhotos[i].place_id) {
+          console.log("Found photo");
+          photoURL = myMapApp.flickrPhotos[i].imagesArray[0];
+          break;
+        }
+      }
+
+      //photoImages = myMapApp.flickrPhotos[marker.place_id];
+      console.log("myMapApp.flickrPhotos = ", myMapApp.flickrPhotos);
+      //console.log("photoImages = ",photoImages);
+
+      // if (typeof photoImages != 'undefined') {
+      //   if (photoImages.length > 0) {
+      //     photoURL = photoImages[0];
+      //   }
+      // }
+
+
       //var infoContent = placeName;
-      var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
-        + '<br>' + placeType + '<br>' + "<img width='80' src=" +
-        photoURL + ">" ;
+      // var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
+      //   + '<br>' + placeType + '<br>' + "<img width='80' src=" +
+      //   photoURL + ">" ;
+
+        var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
+        + '<br>' + placeType + '<br>' + photoURL;
+
+
       console.log("infocontent = ", infoContent);
       infowindow.setContent(infoContent);
-      console.log("infowindow.open");
+      //console.log("infowindow.open");
       infowindow.open(myMapApp.map, marker);
-      console.log("panto");
+      //console.log("panto");
       myMapApp.map.panTo(marker.position);
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){marker.setAnimation(null);}, 1450);
-      console.log("Completed displayInfoWindow");
+      //console.log("Completed displayInfoWindow");
     }
+
+
+
+
+    myMapApp.getFlickrPhotos = function (searchLat, searchLon, placeName, placeID) {
+
+      console.log("getFlickrPhotos searchLat, searchLon, placeName, placeID = ", searchLat, searchLon, placeName, placeID)
+
+      var flickrPhotosArray = [];
+      // var FLICKR_API_KEY = '0ac0ce40df15543f032c315fafeb8dfe';
+      // var searchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&";
+      // var searchReqParams = {
+      //   'api_key': FLICKR_API_KEY,
+      //   'tags': 'monument,statue,historical,church,mosque,synagogue,museum',
+      //   'has_geo': true,
+      //   'lat': searchLat,
+      //   'lon': searchLon,
+      //   //'place_id': place.place_id,
+      //   'accuracy': 16,
+      //   'format': 'json',
+      //   'safe_search': 1,
+      //   'privacy_filter': 1,
+      //   'per_page': 10,
+      //   'text': placeName
+      // }
+
+      // $.ajax({
+      //   type: 'GET',
+      //   url : searchUrl,
+      //   dataType:'jsonp',
+      //   cache : true,
+      //   crossDomain : true,
+      //   jsonp: false,
+      //   jsonpCallback : 'jsonFlickrApi',
+      //   data: searchReqParams,
+      //   success: function(data, textStatus) {
+      //     console.log("** AJAX SUCCESS **");
+      //     if (data.photos.photo.length > 0) {
+      //       flickrPhotosArray = getImages(data);
+      //       storeImages(flickrPhotosArray);
+      //       //$('#warning').hide();
+      //     } else {
+      //       console.log(data.photos);
+      //       //$('#warning').show();
+      //     }
+      //   }
+      // })
+      // .fail(function(jqXHR, textStatus, errorThrown) {
+      //   console.log('req failed');
+      //   console.log('textStatus: ', textStatus, ' code: ', jqXHR.status);
+      // });
+
+      // function jsonFlickrApi(result) {
+      //     console.log("jsonFlickrApi");
+      // };
+
+      // new logic to call flickr
+
+      var searchString = placeName.replace(' ','+');
+      var searchUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search' +
+        '&api_key=0ac0ce40df15543f032c315fafeb8dfe&text=' + searchString +
+        '&license=1%2C2%2C3%2C4%2C5%2C6%2C7&content_type=1&lat=' + searchLat +
+        '&lon=' + searchLon + '&radius=1&radius_units=km&per_page=10&page=1' +
+        '&format=json&nojsoncallback=1';
+
+      // Get flickr data with async call.
+      // If successful, parse the data and store in an array to display.
+      // If fails, notify user.
+
+      $.getJSON(searchUrl)
+        .done(function(data) {
+          console.log("** AJAX SUCCESS **");
+          if (data.photos.photo.length > 0) {
+            flickrPhotosArray = getImages(data);
+            storeImages(flickrPhotosArray);
+          }
+        })
+        .fail(function(jqxhr, textStatus, error) {
+          alert("Unable to get photos from Flickr at this time.");
+        });
+
+
+      function getImages(data) {
+        console.log("getImages", data);
+        var htmlPhotoURLs = [];
+        $.each(data.photos.photo, function(i,item){
+              //Reads in each photo id.
+              //var photoID = item.id;
+              //Adds the photo id to the 'images1' div (created in the main body of this html page).
+              //$('#images').append(photoID);
+              //Gets the url for the image.
+              var photoURL = 'http://farm' + item.farm + '.static.flickr.com/' + item.server + '/' + item.id + '_' + item.secret + '_m.jpg';
+              //Uses this URL to creats a html 'img' tag.
+              htmlString = '<img src="' + photoURL + '">';
+              //Adds this image to the 'images1' div.
+              //$('#images').append(htmlString);
+              //Adds some basic formatting to seperate out the images.
+              //$('#images').append("<br/><hr/><br/>");
+              htmlPhotoURLs.push(htmlString);
+              //console.log("htmlString", htmlString);
+          });
+        return htmlPhotoURLs;
+      };
+
+      function storeImages(imagesArray) {
+        // CompleteList
+        // for(var i = 0; i < myMapApp.CompleteList.length; i++) {
+        //   //console.log(myMapApp.markers[i].place_id);
+        //   if(placeID === myMapApp.CompleteList[i].place_id) {
+        //     console.log("Found location in storeImages");
+        //     myMapApp.CompleteList[i].flickrImages = imagesArray;
+        //     break;
+        //   }
+        // }
+        // // FilteredList
+        // for(var i = 0; i < myMapApp.FilteredList.length; i++) {
+        //   //console.log(myMapApp.markers[i].place_id);
+        //   if(placeID === myMapApp.FilteredList[i].place_id) {
+        //     myMapApp.FilteredList[i].flickrImages = imagesArray;
+        //     break;
+        //   }
+        // }
+        //console.log("placeID = ", placeID)
+
+        var imagesRecord = {};
+        imagesRecord.place_id = placeID;
+        imagesRecord.imagesArray = imagesArray;
+        myMapApp.flickrPhotos.push(imagesRecord);
+
+      };
+
+    };
+
+
 
     // set a single map marker
     myMapApp.setMapMarker = function (place) {
-        console.log("setMapMarker");
+        //console.log("setMapMarker");
         var marker = new google.maps.Marker({
             map: myMapApp.map,
             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
@@ -256,7 +437,7 @@ myMapApp.viewModel = function() {
         // click on a Google Maps marker
 
         google.maps.event.addListener(marker, 'click', function() {
-          console.log("click Marker place = ", place);
+          //console.log("click Marker place = ", place);
 
           // var address;
           // if (place.vicinity !== undefined) {
@@ -268,6 +449,7 @@ myMapApp.viewModel = function() {
           var placeName = place.name;
           var placeAddress = myMapApp.setAddress(place);
           var placeType = place.types[1];
+          //var placePhotos = place.flickrPhotos;
           myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
           // console.log("click marker");
           // infowindow.setContent(infoContent);
@@ -303,130 +485,130 @@ myMapApp.viewModel = function() {
     };
 
     // set array item for each map location
-    myMapApp.setArray = function ( category, name, lat, lon) {
-        this.category = ko.observable(category);
-        this.name = ko.observable(name);
-        this.lat = ko.observable(lat);
-        this.lon = ko.observable(lon);
-    };
+    // myMapApp.setArray = function ( category, name, lat, lon) {
+    //     this.category = ko.observable(category);
+    //     this.name = ko.observable(name);
+    //     this.lat = ko.observable(lat);
+    //     this.lon = ko.observable(lon);
+    // };
 
     // load the map
-    myMapApp.loadMap = function(item){
-        console.log("LoadMap start");
-        // initialize the complete list
-        //myMapApp.CompleteList = ko.observableArray();
-        // create the complete list of map locations
-        for (var j = 0; j < item.length; j++){
-            myMapApp.CompleteList.push( new myMapApp.setArray( item[j]['category'], item[j]['name'], item[j]['lat'], item[j]['lon']));
-        }
-        console.log("item.length = ", item.length);
+    // myMapApp.loadMap = function(item){
+    //     console.log("LoadMap start");
+    //     // initialize the complete list
+    //     //myMapApp.CompleteList = ko.observableArray();
+    //     // create the complete list of map locations
+    //     for (var j = 0; j < item.length; j++){
+    //         myMapApp.CompleteList.push( new myMapApp.setArray( item[j]['category'], item[j]['name'], item[j]['lat'], item[j]['lon']));
+    //     }
+    //     console.log("item.length = ", item.length);
 
-        // create the filtered list
-        myMapApp.FilteredList = ko.computed(function() {
-          var filter = myMapApp.query().toLowerCase();
-          if(myMapApp.query() === "") {
-              // return the complete list
-              console.log("CompleteList =", myMapApp.CompleteList());
-              return myMapApp.CompleteList();
-          } else {
-              return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
-                //find the filter string in the name
-                return item.name().toLowerCase().indexOf(filter)>-1;
-              });
-          }
-        });
+    //     // create the filtered list
+    //     myMapApp.FilteredList = ko.computed(function() {
+    //       var filter = myMapApp.query().toLowerCase();
+    //       if(myMapApp.query() === "") {
+    //           // return the complete list
+    //           console.log("CompleteList =", myMapApp.CompleteList());
+    //           return myMapApp.CompleteList();
+    //       } else {
+    //           return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
+    //             //find the filter string in the name
+    //             return item.name().toLowerCase().indexOf(filter)>-1;
+    //           });
+    //       }
+    //     });
 
-        // mapMarkerList should be filtered list if there is one, otherwise the complete list.
-        var mapMarkerList = ko.observableArray();
-        mapMarkerList = myMapApp.CompleteList;
-        if (myMapApp.FilteredList().length > 0) {
-                mapMarkerList = myMapApp.FilteredList;
-        };
-        console.log("FilteredList =", myMapApp.FilteredList());
-        console.log("mapMarkerList =", mapMarkerList());
-        // delete the current markers on the map
-        myMapApp.deleteMarkers();
-        // create new markers based on the mapMarkerList
-        for (var j = 0; j < mapMarkerList().length; j++){
-            var n = mapMarkerList()[j].name();
-            myMapApp.setMapMarker( mapMarkerList()[j].category(), mapMarkerList()[j].name(), mapMarkerList()[j].lat(), mapMarkerList()[j].lon());
-        }
-    };
+    //     // mapMarkerList should be filtered list if there is one, otherwise the complete list.
+    //     var mapMarkerList = ko.observableArray();
+    //     mapMarkerList = myMapApp.CompleteList;
+    //     if (myMapApp.FilteredList().length > 0) {
+    //             mapMarkerList = myMapApp.FilteredList;
+    //     };
+    //     console.log("FilteredList =", myMapApp.FilteredList());
+    //     console.log("mapMarkerList =", mapMarkerList());
+    //     // delete the current markers on the map
+    //     myMapApp.deleteMarkers();
+    //     // create new markers based on the mapMarkerList
+    //     for (var j = 0; j < mapMarkerList().length; j++){
+    //         var n = mapMarkerList()[j].name();
+    //         myMapApp.setMapMarker( mapMarkerList()[j].category(), mapMarkerList()[j].name(), mapMarkerList()[j].lat(), mapMarkerList()[j].lon());
+    //     }
+    // };
 
     // get all the map locations from Google Maps
-    myMapApp.getDataFromGoogleMaps = function(data) {
-         // must create the map to use Google Maps Place Services to locate places.
-         console.log("Enter getDataFromGoogleMaps");
+    // myMapApp.getDataFromGoogleMaps = function(data) {
+    //      // must create the map to use Google Maps Place Services to locate places.
+    //      console.log("Enter getDataFromGoogleMaps");
 
-         function initialize() {
+    //      function initialize() {
 
-             myMapApp.createMap();
+    //          myMapApp.createMap();
 
-             var pyrmont = new google.maps.LatLng(myMapApp.model.centerCoordinates[0], myMapApp.model.centerCoordinates[1]);
+    //          var pyrmont = new google.maps.LatLng(myMapApp.model.centerCoordinates[0], myMapApp.model.centerCoordinates[1]);
 
-             // Specify location, radius and place types for your Places API search.
-             // note: radius is in meters,  3219 meters = 2 miles
-              var request = {
-                location: pyrmont,
-                radius: '3219',
-                types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
-              };
+    //          // Specify location, radius and place types for your Places API search.
+    //          // note: radius is in meters,  3219 meters = 2 miles
+    //           var request = {
+    //             location: pyrmont,
+    //             radius: '3219',
+    //             types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
+    //           };
 
-              // Create the PlaceService and send the request.
-              // Handle the callback with an anonymous function.
-              var service = new google.maps.places.PlacesService(myMapApp.map);
-              console.log("B4 call to nearbySearch");
-              // this service request is asynchronous
-              service.nearbySearch(request, callback);
-          }
+    //           // Create the PlaceService and send the request.
+    //           // Handle the callback with an anonymous function.
+    //           var service = new google.maps.places.PlacesService(myMapApp.map);
+    //           console.log("B4 call to nearbySearch");
+    //           // this service request is asynchronous
+    //           service.nearbySearch(request, callback);
+    //       }
 
-          function callback (results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-              console.log("B4: callback, CompleteList: ", myMapApp.CompleteList());
-              console.log("B4: callback, myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
-              for (var i = 0; i < results.length; i++) {
-                var place = results[i];
-                // If the request succeeds, draw the place location on
-                // the map as a marker, and register an event to handle a
-                // click on the marker.
-                // var marker = new google.maps.Marker({
-                //   map: map,
-                //   position: place.geometry.location
-                // });
-                //console.log("place = ", place);
-                if (i == 0) {
-                    data.geoCoordinates = [];
-                    myMapApp.CompleteList([]);
-                    myMapApp.model.geoCoordinates = [];
-                }
-                var category = place.types[0];
-                var name = place.name;
-                var lat = place.geometry.location.lat();
-                var lon = place.geometry.location.lng();
-                //console.log(category, name, lat, lon);
-                data.geoCoordinates.push({'category':category, 'name': name, 'lat': lat, 'lon': lon});
-                myMapApp.CompleteList.push( new myMapApp.setArray(category, name, lat, lon));
-                //myMapApp.model.geoCoordinates.push(category, name, lat, lon);
-                myMapApp.model.geoCoordinates.push({'category':category, 'name': name, 'lat': lat, 'lon': lon});
-              }
-              console.log("Inside getDataFromGoogleMaps, data.geoCoordinates: ", data.geoCoordinates);
-              //myMapApp.FilteredList = data.geoCoordinates;
-              console.log("Complete List: ", myMapApp.CompleteList);
-              console.log("myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
-              myMapApp.loadMap( myMapApp.model.geoCoordinates );
-              //myMapApp.view();
-              //ko.applyBindings(myMapApp.viewModel);
-              //myMapApp.model.geoCoordinates = data.geoCoordinates;
-              //console.log("After: myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
-            } else {
-                console.error(status);
-                return;
-            }
-          }
-          initialize();
-          console.log("B4 return: data.geoCoordinates", data.geoCoordinates);
-          return;
-    };
+    //       function callback (results, status) {
+    //         if (status == google.maps.places.PlacesServiceStatus.OK) {
+    //           console.log("B4: callback, CompleteList: ", myMapApp.CompleteList());
+    //           console.log("B4: callback, myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
+    //           for (var i = 0; i < results.length; i++) {
+    //             var place = results[i];
+    //             // If the request succeeds, draw the place location on
+    //             // the map as a marker, and register an event to handle a
+    //             // click on the marker.
+    //             // var marker = new google.maps.Marker({
+    //             //   map: map,
+    //             //   position: place.geometry.location
+    //             // });
+    //             //console.log("place = ", place);
+    //             if (i == 0) {
+    //                 data.geoCoordinates = [];
+    //                 myMapApp.CompleteList([]);
+    //                 myMapApp.model.geoCoordinates = [];
+    //             }
+    //             var category = place.types[0];
+    //             var name = place.name;
+    //             var lat = place.geometry.location.lat();
+    //             var lon = place.geometry.location.lng();
+    //             //console.log(category, name, lat, lon);
+    //             data.geoCoordinates.push({'category':category, 'name': name, 'lat': lat, 'lon': lon});
+    //             myMapApp.CompleteList.push( new myMapApp.setArray(category, name, lat, lon));
+    //             //myMapApp.model.geoCoordinates.push(category, name, lat, lon);
+    //             myMapApp.model.geoCoordinates.push({'category':category, 'name': name, 'lat': lat, 'lon': lon});
+    //           }
+    //           console.log("Inside getDataFromGoogleMaps, data.geoCoordinates: ", data.geoCoordinates);
+    //           //myMapApp.FilteredList = data.geoCoordinates;
+    //           console.log("Complete List: ", myMapApp.CompleteList);
+    //           console.log("myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
+    //           myMapApp.loadMap( myMapApp.model.geoCoordinates );
+    //           //myMapApp.view();
+    //           //ko.applyBindings(myMapApp.viewModel);
+    //           //myMapApp.model.geoCoordinates = data.geoCoordinates;
+    //           //console.log("After: myMapApp.model.geoCoordinates: ", myMapApp.model.geoCoordinates);
+    //         } else {
+    //             console.error(status);
+    //             return;
+    //         }
+    //       }
+    //       initialize();
+    //       console.log("B4 return: data.geoCoordinates", data.geoCoordinates);
+    //       return;
+    // };
 
 // ------- Model -------
 
