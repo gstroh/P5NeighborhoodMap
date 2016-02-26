@@ -15,6 +15,8 @@ myMapApp.viewModel = function() {
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
     myMapApp.flickrPhotos = [];
+    myMapApp.noGooglePages = 0;
+    myMapApp.placeTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest'];
 
 
     myMapApp.init = function() {
@@ -33,7 +35,8 @@ myMapApp.viewModel = function() {
       var request = {
           location: Jerusalem,
           radius: 3219,
-          types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
+          types: myMapApp.placeTypes
+          //types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
       };
 
       infowindow = new google.maps.InfoWindow();
@@ -42,6 +45,7 @@ myMapApp.viewModel = function() {
     };
 
     function processGoogleResults (results, status, pagination) {
+      console.log("processGoogleResults, results length = ", results.length);
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < results.length; i++) {
@@ -54,8 +58,28 @@ myMapApp.viewModel = function() {
         myMapApp.map.fitBounds(bounds);
         // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
+        myMapApp.noGooglePages++;
         // process multiple pages
+        if (myMapApp.noGooglePages < 3) {
+            //console.log("pagination has next page", pagination);
+            var moreButton = document.getElementById('more');
+
+            moreButton.disabled = false;
+
+            moreButton.addEventListener('click', function() {
+              console.log("more button event listener");
+              moreButton.disabled = true;
+              // if (pagination.hasNextPage) {
+              //   console.log("** pagination has next page", pagination);
+              pagination.nextPage();
+              // } else {
+              //   moreButton.disabled = true;
+              // }
+
+            });
+        }
         // if (pagination.hasNextPage) {
+        //   console.log("pagination has next page", pagination);
         //   //console.log("pagination");
         //   pagination.nextPage();
         // }
@@ -211,19 +235,19 @@ myMapApp.viewModel = function() {
       myMapApp.map.panTo(marker.position);
 
       // waits 300 milliseconds for the getFoursquare async function to finish
-      setTimeout(function() {
+      //setTimeout(function() {
         // var contentString = place.name();
         // infowindow.setContent(contentString);
         // infowindow.open(myMapApp.map, marker);
         // marker.setAnimation(google.maps.Animation.DROP);
         var placeName = place.name();
         var placeAddress = place.address();
-        var placeType = place.types[1];
+        var placeType = place.types[0];
         //var placePhotos = place.flickrPhotos;
         //console.log("clickList place = ", place);
         myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
 
-      }, 300);
+      //}, 300);
     };
 
 
@@ -236,7 +260,7 @@ myMapApp.viewModel = function() {
 
       var photoURL = " ";
       var photoImages = [];
-      console.log("marker = ", marker);
+      //console.log("marker = ", marker);
 
       for(var i = 0; i < myMapApp.flickrPhotos.length; i++) {
         //console.log(myMapApp.markers[i].place_id);
@@ -248,7 +272,7 @@ myMapApp.viewModel = function() {
       }
 
       //photoImages = myMapApp.flickrPhotos[marker.place_id];
-      console.log("myMapApp.flickrPhotos = ", myMapApp.flickrPhotos);
+      //console.log("myMapApp.flickrPhotos = ", myMapApp.flickrPhotos);
       //console.log("photoImages = ",photoImages);
 
       // if (typeof photoImages != 'undefined') {
@@ -263,14 +287,28 @@ myMapApp.viewModel = function() {
       //   + '<br>' + placeType + '<br>' + "<img width='80' src=" +
       //   photoURL + ">" ;
 
+      // replace _ in type with a blank
+      var placeTypeString = placeType.replace(/_/g,' ');
+
         var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
-        + '<br>' + placeType + '<br>' + photoURL;
+        + '<br>' + placeTypeString + '<br>' +
+        '<button onclick="myFunction()">Wiki Articles</button>' +
+        photoURL;
 
 
-      console.log("infocontent = ", infoContent);
+      //console.log("infocontent = ", infoContent);
       infowindow.setContent(infoContent);
       //console.log("infowindow.open");
       infowindow.open(myMapApp.map, marker);
+
+      // get Wiki articles
+      var wikiContent = myMapApp.getWikiArticles(marker);
+      var infowindow2 = new google.maps.InfoWindow();
+      // loop over wikiContent and make a list element
+
+      infowindow2.setContent("second info window");
+      infowindow2.open(myMapApp.map, marker);
+
       //console.log("panto");
       myMapApp.map.panTo(marker.position);
       marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -278,12 +316,18 @@ myMapApp.viewModel = function() {
       //console.log("Completed displayInfoWindow");
     }
 
+    myMapApp.getWikiArticles = function (marker) {
+      // get Wiki articles and return array of articles to display in inforwindow.
+      var wikiArticles[];
+
+      return wikiArticles;
+    }
 
 
 
     myMapApp.getFlickrPhotos = function (searchLat, searchLon, placeName, placeID) {
 
-      console.log("getFlickrPhotos searchLat, searchLon, placeName, placeID = ", searchLat, searchLon, placeName, placeID)
+      //console.log("getFlickrPhotos searchLat, searchLon, placeName, placeID = ", searchLat, searchLon, placeName, placeID)
 
       var flickrPhotosArray = [];
       // var FLICKR_API_KEY = '0ac0ce40df15543f032c315fafeb8dfe';
@@ -348,7 +392,7 @@ myMapApp.viewModel = function() {
 
       $.getJSON(searchUrl)
         .done(function(data) {
-          console.log("** AJAX SUCCESS **");
+          //console.log("** AJAX SUCCESS **");
           if (data.photos.photo.length > 0) {
             flickrPhotosArray = getImages(data);
             storeImages(flickrPhotosArray);
@@ -360,7 +404,7 @@ myMapApp.viewModel = function() {
 
 
       function getImages(data) {
-        console.log("getImages", data);
+        //console.log("getImages", data);
         var htmlPhotoURLs = [];
         $.each(data.photos.photo, function(i,item){
               //Reads in each photo id.
@@ -415,9 +459,27 @@ myMapApp.viewModel = function() {
     // set a single map marker
     myMapApp.setMapMarker = function (place) {
         //console.log("setMapMarker");
+       //myMapApp.placeTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest'];
+        var placeIcons = ['http://maps.google.com/mapfiles/ms/icons/blue-dot.png',    // church
+                          'http://maps.google.com/mapfiles/ms/icons/green-dot.png',   // mosque
+                          'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',  // museaum
+                          'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',  // place of worship
+                          'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // synagogue
+                          'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
+
+        var placeType = place.types[0];
+        //console.log("placeType = ", placeType);
+        for (var i = 0; i < myMapApp.placeTypes.length; i++) {
+          if (placeType == myMapApp.placeTypes[i]) {
+
+            var placeIcon = placeIcons[i];
+            break;
+          }
+        }
+        //console.log("placeIcon = ", placeIcon);
         var marker = new google.maps.Marker({
             map: myMapApp.map,
-            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+            icon: placeIcon,
             position: place.geometry.location,
             title: place.name,
             place_id: place.place_id,
@@ -448,7 +510,7 @@ myMapApp.viewModel = function() {
 
           var placeName = place.name;
           var placeAddress = myMapApp.setAddress(place);
-          var placeType = place.types[1];
+          var placeType = place.types[0];
           //var placePhotos = place.flickrPhotos;
           myMapApp.displayInfoWindow(placeName, placeAddress, placeType, marker);
           // console.log("click marker");

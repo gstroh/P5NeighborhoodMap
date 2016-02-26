@@ -74,6 +74,11 @@ hr {
   overflow: auto;
 }
 
+#more {
+  width: 100%;
+  margin: 2px 0 2px 0;
+}
+
 /*.nav {
 	width: 95%;
   	height: 100%;
