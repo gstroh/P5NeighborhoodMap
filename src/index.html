@@ -27,8 +27,18 @@
     </nav>
     <button id="more">More results</button>
   </div>
+  <!-- Try this -->
+  <div id="legend">
+    <ul data-bind="template: {name:'listLegend', foreach:myMapApp.placeTypes}">
+    </ul>
+  </div>
 
-  <!-- This is a knockout template used for the filtered list of map location -->
+  <script type="text/html" id="listLegend">
+     <img data-bind="attr: {'src': placeIcon}"></img>
+     <span class="legendText" data-bind="text: displayPlaceType"></span>
+  </script>
+
+  <!-- This is a knockout template used for the filtered list of map locations -->
   <script type="text/html" id="listTemplate">
    <li data-bind="click: myMapApp.clickList">
    <hr>

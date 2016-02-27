@@ -59,19 +59,37 @@ hr {
   	top: 0;
 }
 
+#legend {
+	display: inline;
+	max-width: 600px;
+	min-width: 200px;
+	position: absolute;
+	bottom: 10px;
+	left: 230px;
+	outline-style: double;
+}
+
+.legendText {
+	font-weight: bold;
+	font-family: Roboto,Arial,sans-serif;
+	font-size: 14px;
+}
+
 #searchMap {
   position: absolute;
   width: 95%;
-  /*max-width: 400px;
-  min-width: 320px;*/
+  /*heigth: 90%;*/
   max-width: 200px;
   min-width: 100px;
-  margin: 1% 0 0 2%;
+  max-height: 93%;
+  margin: 1% 0 0 1%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   font-family: Roboto,Arial,sans-serif;
   font-size: 11px;
   height: 100%;
   overflow: auto;
+  top: 50px;
+  bottom: 20px;
 }
 
 #more {
@@ -96,6 +114,10 @@ hr {
     #searchMap {
         width: 5%;
     }
+
+    #legend {
+		left: 5px;
+	}
     /*#search:focus {
         width: 91%;
     }*/

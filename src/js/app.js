@@ -11,13 +11,33 @@ myMapApp.viewModel = function() {
     var lat;
     var lng;
     myMapApp.markers = [];
+    myMapApp.marker = null;
     myMapApp.query = ko.observable("");
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
     myMapApp.flickrPhotos = [];
     myMapApp.noGooglePages = 0;
-    myMapApp.placeTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest'];
+    // new data structure in array with these fields: placeIcon, googlePlaceType, displayPlaceType.
+    myMapApp.googleTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue'];
+    //myMapApp.placeTypes = ko.observableArray();
+    myMapApp.placeTypes = [];
+    myMapApp.placeTypes =
+      [{displayPlaceType: "Church", placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"},
+       {displayPlaceType: "Mosque", placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"},
+       {displayPlaceType: "Museum", placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"},
+       {displayPlaceType: "Place of Worship", placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"},
+       {displayPlaceType: "Synagogue", placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"}
+      ];
 
+    // myMapApp.displayPlaceType = ko.observableArray();
+    // myMapApp.displayPlaceType = ['Church', 'Mosque', 'Museum', 'Place of Worship', 'Synagogue', 'Point of Interest'];
+    // myMapApp.placeIcons = ko.observableArray();
+    // myMapApp.placeIcons = ['http://maps.google.com/mapfiles/ms/icons/blue-dot.png',   // church
+    //                        'http://maps.google.com/mapfiles/ms/icons/green-dot.png',   // mosque
+    //                        'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',  // museaum
+    //                        'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',  // place of worship
+    //                        'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // synagogue
+    //                        'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
 
     myMapApp.init = function() {
 
@@ -35,7 +55,7 @@ myMapApp.viewModel = function() {
       var request = {
           location: Jerusalem,
           radius: 3219,
-          types: myMapApp.placeTypes
+          types: myMapApp.googleTypes
           //types: ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest']
       };
 
@@ -258,17 +278,22 @@ myMapApp.viewModel = function() {
 
     myMapApp.displayInfoWindow = function (placeName, placeAddress, placeType, marker) {
 
-      var photoURL = " ";
+      var photoURL = "";
       var photoImages = [];
       //console.log("marker = ", marker);
 
-      for(var i = 0; i < myMapApp.flickrPhotos.length; i++) {
+      for (var i = 0; i < myMapApp.flickrPhotos.length; i++) {
         //console.log(myMapApp.markers[i].place_id);
         if(marker.place_id === myMapApp.flickrPhotos[i].place_id) {
           console.log("Found photo");
           photoURL = myMapApp.flickrPhotos[i].imagesArray[0];
           break;
         }
+      }
+      console.log("photoURL.length = ", photoURL.length, photoURL);
+      if (photoURL.length == 0) {
+        //photoURL = "<div>No Flickr photos found for " + placeName + ".</div>";
+        photoURL = "No Flickr photos found for " + placeName + ".";
       }
 
       //photoImages = myMapApp.flickrPhotos[marker.place_id];
@@ -289,25 +314,23 @@ myMapApp.viewModel = function() {
 
       // replace _ in type with a blank
       var placeTypeString = placeType.replace(/_/g,' ');
+      // set marker to global variable for use in displayWikiArticles
+      myMapApp.marker = marker;
 
-        var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
-        + '<br>' + placeTypeString + '<br>' +
-        '<button onclick="myFunction()">Wiki Articles</button>' +
-        photoURL;
+      var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
+        + '<br>' + placeTypeString + '<br>' + photoURL + '<br>' +
+        '<button id="wiki" onclick="myMapApp.displayWikiArticles()">Wiki Articles</button>';
 
 
       //console.log("infocontent = ", infoContent);
+
+
+      myMapApp.infoContent = infoContent;
+
+
       infowindow.setContent(infoContent);
       //console.log("infowindow.open");
       infowindow.open(myMapApp.map, marker);
-
-      // get Wiki articles
-      var wikiContent = myMapApp.getWikiArticles(marker);
-      var infowindow2 = new google.maps.InfoWindow();
-      // loop over wikiContent and make a list element
-
-      infowindow2.setContent("second info window");
-      infowindow2.open(myMapApp.map, marker);
 
       //console.log("panto");
       myMapApp.map.panTo(marker.position);
@@ -316,11 +339,59 @@ myMapApp.viewModel = function() {
       //console.log("Completed displayInfoWindow");
     }
 
-    myMapApp.getWikiArticles = function (marker) {
+     myMapApp.displayWikiArticles = function () {
       // get Wiki articles and return array of articles to display in inforwindow.
-      var wikiArticles[];
+      // get Wiki articles
 
-      return wikiArticles;
+      // loop over wikiContent and make a list element
+
+      // get Wiki articles and return array of articles to display in inforwindow.
+      var wikiArticles = [];
+
+      var wikiRequestTimeout = setTimeout(function(){
+        alert("Failed to get Wikipedia Resources");
+      }, 8000);
+
+      var searchString = myMapApp.marker.title;
+      console.log("wiki search srtring = ", searchString);
+      var wikiURL =   'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + searchString +
+                    '&format=json&callback=wikiCallback';
+      $.ajax({
+          url: wikiURL,
+          dataType: 'jsonp',
+          success: function(response) {
+              console.log("wiki success");
+              var articleList = response[1];
+              for (var i = 0; i < articleList.length; i++) {
+                  var articleStr = articleList[i];
+                  var url = 'http://en.wikipedia.org/wiki/' + articleStr;
+                  //console.log('****<li><a href="' + url + '">' + articleStr + '</a></li>');
+                  // If the user selects a wiki article, open it in a new browser window (target param).
+                  // This leaves the map app screen unchanged when the user returns.
+                  wikiArticles.push('<li><a href="' + url + '" target="_blank">' + articleStr + '</a></li>');
+              };
+              //var infowindow2 = new google.maps.InfoWindow();
+              console.log("no of wiki articles = ", articleList.length);
+              var wikiContent = "";
+              if (articleList.length > 0) {
+                for (var i = 0; i < wikiArticles.length; i++) {
+                  var wikiHTML = wikiArticles[i];
+                  wikiContent = wikiContent + wikiHTML;
+                };
+              } else {
+                wikiContent = "<div>No Wiki articles found for " + searchString + ".</div>";
+              }
+              // display the wiki articles below the current content
+              infowindow.setContent(myMapApp.infoContent + wikiContent);
+              // once the wiki articles have been displayed, disable the button
+              var wikiButton = document.getElementById('wiki');
+              wikiButton.disabled = true;
+              //infowindow2.setContent(wikiContent);
+              //infowindow2.open(myMapApp.map, myMapApp.marker);
+              //console.log(response);
+              clearTimeout(wikiRequestTimeout);
+          }
+      });
     }
 
 
@@ -460,26 +531,25 @@ myMapApp.viewModel = function() {
     myMapApp.setMapMarker = function (place) {
         //console.log("setMapMarker");
        //myMapApp.placeTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'point_of_interest'];
-        var placeIcons = ['http://maps.google.com/mapfiles/ms/icons/blue-dot.png',    // church
-                          'http://maps.google.com/mapfiles/ms/icons/green-dot.png',   // mosque
-                          'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',  // museaum
-                          'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',  // place of worship
-                          'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // synagogue
-                          'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
+        // var placeIcons = ['http://maps.google.com/mapfiles/ms/icons/blue-dot.png',    // church
+        //                   'http://maps.google.com/mapfiles/ms/icons/green-dot.png',   // mosque
+        //                   'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',  // museaum
+        //                   'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',  // place of worship
+        //                   'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // synagogue
+        //                   'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
 
         var placeType = place.types[0];
-        //console.log("placeType = ", placeType);
-        for (var i = 0; i < myMapApp.placeTypes.length; i++) {
-          if (placeType == myMapApp.placeTypes[i]) {
-
-            var placeIcon = placeIcons[i];
+        console.log("myMapApp.placeTypes = ", myMapApp.placeTypes);
+        for (var i = 0; i < myMapApp.googleTypes.length; i++) {
+          if (placeType == myMapApp.googleTypes[i]) {
+            var placeIconFile = myMapApp.placeTypes[i].placeIcon;
             break;
           }
         }
-        //console.log("placeIcon = ", placeIcon);
+        console.log("placeIconFile = ", placeIconFile);
         var marker = new google.maps.Marker({
             map: myMapApp.map,
-            icon: placeIcon,
+            icon: placeIconFile,
             position: place.geometry.location,
             title: place.name,
             place_id: place.place_id,
