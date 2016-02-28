@@ -13,21 +13,29 @@ myMapApp.viewModel = function() {
     myMapApp.markers = [];
     myMapApp.marker = null;
     myMapApp.query = ko.observable("");
+    myMapApp.chosenPlaceTypes = ko.observableArray();
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
     myMapApp.flickrPhotos = [];
     myMapApp.noGooglePages = 0;
     // new data structure in array with these fields: placeIcon, googlePlaceType, displayPlaceType.
     myMapApp.googleTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue'];
-    //myMapApp.placeTypes = ko.observableArray();
-    myMapApp.placeTypes = [];
-    myMapApp.placeTypes =
-      [{displayPlaceType: "Church", placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"},
-       {displayPlaceType: "Mosque", placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"},
-       {displayPlaceType: "Museum", placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"},
-       {displayPlaceType: "Place of Worship", placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"},
-       {displayPlaceType: "Synagogue", placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"}
-      ];
+    myMapApp.placeTypes = ko.observableArray();
+    //myMapApp.placeTypes = [];
+    // myMapApp.placeTypes =
+    //   [{displayPlaceType: "Church", placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"},
+    //    {displayPlaceType: "Mosque", placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"},
+    //    {displayPlaceType: "Museum", placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"},
+    //    {displayPlaceType: "Place of Worship", placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"},
+    //    {displayPlaceType: "Synagogue", placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"}
+    //   ];
+
+    myMapApp.placeTypes.push({displayPlaceType: "Church", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Mosque", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Museum", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Place of Worship", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Synagogue", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"});
+
 
     // myMapApp.displayPlaceType = ko.observableArray();
     // myMapApp.displayPlaceType = ['Church', 'Mosque', 'Museum', 'Place of Worship', 'Synagogue', 'Point of Interest'];
@@ -62,10 +70,23 @@ myMapApp.viewModel = function() {
       infowindow = new google.maps.InfoWindow();
       service = new google.maps.places.PlacesService(myMapApp.map);
       service.nearbySearch(request, processGoogleResults);
+
+      // Look up location by textSearch.
+      // var request = {
+      //     location: Jerusalem,
+      //     radius: 3219,
+      //     query: "Mount of Olives"
+      //     //name: 'Western Wall'
+      // };
+
+      // infowindow = new google.maps.InfoWindow();
+      // service = new google.maps.places.PlacesService(myMapApp.map);
+      // service.textSearch(request, processGoogleResults);
     };
 
     function processGoogleResults (results, status, pagination) {
-      console.log("processGoogleResults, results length = ", results.length);
+      ///console.log("processGoogleResults, results length = ", results.length);
+      console.log("processGoogleResults, results = ", results);
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < results.length; i++) {
@@ -166,6 +187,18 @@ myMapApp.viewModel = function() {
 
       myMapApp.getFlickrPhotos(lat, lon, placeName, placeID);
     };
+
+    // Google place types
+
+    myMapApp.placeTypes.subscribe (function(changes) {
+      console.log("checked changed");
+      changes.forEach(function(change) {
+        if (change.status === 'added' || change.status === 'deleted') {
+            console.log("Added or removed! The added/removed element is:", change.value);
+          }
+        });
+    }, null, "arrayChange");
+
 
 
     // Filter
@@ -539,14 +572,14 @@ myMapApp.viewModel = function() {
         //                   'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
 
         var placeType = place.types[0];
-        console.log("myMapApp.placeTypes = ", myMapApp.placeTypes);
+        //console.log("myMapApp.placeTypes = ", myMapApp.placeTypes);
         for (var i = 0; i < myMapApp.googleTypes.length; i++) {
           if (placeType == myMapApp.googleTypes[i]) {
-            var placeIconFile = myMapApp.placeTypes[i].placeIcon;
+            var placeIconFile = myMapApp.placeTypes()[i].placeIcon;
             break;
           }
         }
-        console.log("placeIconFile = ", placeIconFile);
+        //console.log("placeIconFile = ", placeIconFile);
         var marker = new google.maps.Marker({
             map: myMapApp.map,
             icon: placeIconFile,

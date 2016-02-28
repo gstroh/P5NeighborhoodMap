@@ -36,7 +36,9 @@
   <script type="text/html" id="listLegend">
      <img data-bind="attr: {'src': placeIcon}"></img>
      <span class="legendText" data-bind="text: displayPlaceType"></span>
+     <input type="checkbox" data-bind="checked: checkedPlace"></input>
   </script>
+  <!--<input type="checkbox" data-bind="checked: displayPlaceType" checked></input>-->
 
   <!-- This is a knockout template used for the filtered list of map locations -->
   <script type="text/html" id="listTemplate">
