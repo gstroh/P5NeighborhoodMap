@@ -13,13 +13,13 @@ myMapApp.viewModel = function() {
     myMapApp.markers = [];
     myMapApp.marker = null;
     myMapApp.query = ko.observable("");
-    myMapApp.chosenPlaceTypes = ko.observableArray();
+    //myMapApp.chosenPlaceTypes = ko.observableArray();
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
     myMapApp.flickrPhotos = [];
     myMapApp.noGooglePages = 0;
     // new data structure in array with these fields: placeIcon, googlePlaceType, displayPlaceType.
-    myMapApp.googleTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue'];
+    myMapApp.googleTypes = ['church', 'mosque', 'museum', 'place_of_worship', 'synagogue', 'park'];
     myMapApp.placeTypes = ko.observableArray();
     //myMapApp.placeTypes = [];
     // myMapApp.placeTypes =
@@ -30,33 +30,45 @@ myMapApp.viewModel = function() {
     //    {displayPlaceType: "Synagogue", placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"}
     //   ];
 
-    myMapApp.placeTypes.push({displayPlaceType: "Church", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Mosque", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Museum", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Place of Worship", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Synagogue", checkedPlace: true, placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Church", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Mosque", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Museum", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Place of Worship", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Synagogue", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Park", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"});
 
+    // myMapApp.placeTypes.push({displayPlaceType: "Cafe", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-pushpin.png"});
+    // myMapApp.placeTypes.push({displayPlaceType: "Food", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/grn-pushpin.png"});
+    // myMapApp.placeTypes.push({displayPlaceType: "Cemetary", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"});
+    // myMapApp.placeTypes.push({displayPlaceType: "Establishment", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/ltblue-dot.png"});
 
-    // myMapApp.displayPlaceType = ko.observableArray();
-    // myMapApp.displayPlaceType = ['Church', 'Mosque', 'Museum', 'Place of Worship', 'Synagogue', 'Point of Interest'];
-    // myMapApp.placeIcons = ko.observableArray();
-    // myMapApp.placeIcons = ['http://maps.google.com/mapfiles/ms/icons/blue-dot.png',   // church
-    //                        'http://maps.google.com/mapfiles/ms/icons/green-dot.png',   // mosque
-    //                        'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',  // museaum
-    //                        'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',  // place of worship
-    //                        'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // synagogue
-    //                        'http://maps.google.com/mapfiles/ms/icons/pink-dot.png'];   // point of interest
 
     myMapApp.init = function() {
 
       console.log("init");
       myMapApp.createMap();
+      myMapApp.subscribePlaceTypes();
       myMapApp.getPlacesFromGoogleMaps();
       myMapApp.getMapCenter();
 
       // move FilteredList code
 
     };
+
+    // create a knockout subscribe to changes to the array element myMapApp.placeTypes.checkedPlace
+
+    myMapApp.subscribePlaceTypes = function () {
+      var arr = myMapApp.placeTypes();
+      for(var i=0, cnt=arr.length;i<cnt;i++){
+        var item = arr[i].checkedPlace;
+        item.subscribe(myMapApp.checkedPlaceChange);
+      }
+    }
+
+    // a change has occurred to the checkedPlace field in the legend
+    myMapApp.checkedPlaceChange = function(NewValue){
+      alert('An items name property change to '+NewValue);
+    }
 
     myMapApp.getPlacesFromGoogleMaps = function () {
 
@@ -187,6 +199,7 @@ myMapApp.viewModel = function() {
 
       myMapApp.getFlickrPhotos(lat, lon, placeName, placeID);
     };
+
 
     // Google place types
 
