@@ -12,6 +12,7 @@ myMapApp.viewModel = function() {
     var lng;
     myMapApp.markers = [];
     myMapApp.marker = null;
+    myMapApp.bounds = null;
     myMapApp.query = ko.observable("");
     //myMapApp.chosenPlaceTypes = ko.observableArray();
     myMapApp.CompleteList = ko.observableArray();
@@ -68,6 +69,10 @@ myMapApp.viewModel = function() {
     // a change has occurred to the checkedPlace field in the legend
     myMapApp.checkedPlaceChange = function(NewValue){
       alert('An items name property change to '+NewValue);
+      // create a computed list for each place type
+      // loop over the place types
+      // save each computed list in an array (push)
+      // or, just push to FilterList as go along
     }
 
     myMapApp.getPlacesFromGoogleMaps = function () {
@@ -100,15 +105,15 @@ myMapApp.viewModel = function() {
       ///console.log("processGoogleResults, results length = ", results.length);
       console.log("processGoogleResults, results = ", results);
       if (status == google.maps.places.PlacesServiceStatus.OK) {
-        bounds = new google.maps.LatLngBounds();
+        myMapApp.bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < results.length; i++) {
           var place = results[i];
           place.marker = myMapApp.setMapMarker(place);
-          bounds.extend(new google.maps.LatLng(
+          myMapApp.bounds.extend(new google.maps.LatLng(
             place.geometry.location.lat(),
             place.geometry.location.lng()));
         }
-        myMapApp.map.fitBounds(bounds);
+        myMapApp.map.fitBounds(myMapApp.bounds);
         // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
         myMapApp.noGooglePages++;
@@ -137,7 +142,9 @@ myMapApp.viewModel = function() {
         //   pagination.nextPage();
         // }
       } else {
+          // error connecting to Google Maps
           console.error(status);
+          alert("Unable to access Google Maps.  Status message = " + status);
           return;
       }
       //console.log("myMapApp.markers = ", myMapApp.markers);
@@ -201,19 +208,6 @@ myMapApp.viewModel = function() {
     };
 
 
-    // Google place types
-
-    myMapApp.placeTypes.subscribe (function(changes) {
-      console.log("checked changed");
-      changes.forEach(function(change) {
-        if (change.status === 'added' || change.status === 'deleted') {
-            console.log("Added or removed! The added/removed element is:", change.value);
-          }
-        });
-    }, null, "arrayChange");
-
-
-
     // Filter
 
     myMapApp.query.subscribe (function(newValue) {
@@ -264,11 +258,25 @@ myMapApp.viewModel = function() {
         var myOptions = {
             zoom: 16,
             center: Jerusalem,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.TERRAIN
+            // HYBRID
+            // ROADMAP
+            // SATELLITE
+            // TERRAIN
+            // dynamic setting: map.setMapTypeId(google.maps.MapTypeId.TERRAIN);
+            //mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
         // create the Google map
         myMapApp.map = new google.maps.Map( $('#map')[0], myOptions);
+
+        // resize event
+        google.maps.event.addDomListener(window, 'resize', function() {
+          // re-fit the markers to the screen as the screen size changes
+          // keep markers centered on map
+          myMapApp.map.fitBounds(myMapApp.bounds);
+          //alert("resize of map");
+        });
     };
 
     // Delete the markers from the map.

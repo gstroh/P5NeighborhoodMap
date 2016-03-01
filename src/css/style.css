@@ -113,11 +113,13 @@ hr {
 @media screen and (max-width: 400px) {
     #searchMap {
         width: 5%;
+        max-height: 83%;
     }
 
     #legend {
 		left: 5px;
 	}
+
     /*#search:focus {
         width: 91%;
     }*/
