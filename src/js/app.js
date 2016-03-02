@@ -402,9 +402,9 @@ myMapApp.viewModel = function() {
       // get Wiki articles and return array of articles to display in inforwindow.
       var wikiArticles = [];
 
-      var wikiRequestTimeout = setTimeout(function(){
-        alert("Failed to get Wikipedia Resources");
-      }, 8000);
+      // var wikiRequestTimeout = setTimeout(function(){
+      //   alert("Failed to get Wikipedia Resources");
+      // }, 8000);
 
       var searchString = myMapApp.marker.title;
       console.log("wiki search srtring = ", searchString);
@@ -444,6 +444,10 @@ myMapApp.viewModel = function() {
               //infowindow2.open(myMapApp.map, myMapApp.marker);
               //console.log(response);
               clearTimeout(wikiRequestTimeout);
+          },
+          error: function (request, status, error) {
+            alert("Unable to access wiki resources at this time.  Error message = ", request.responseText);
+            console.log("Error with wiki ajax request, error = ", request.responseText);
           }
       });
     }
@@ -525,6 +529,7 @@ myMapApp.viewModel = function() {
         })
         .fail(function(jqxhr, textStatus, error) {
           alert("Unable to get photos from Flickr at this time.");
+          console.log("Failed to getFlickrPhotos, error = ", error);
         });
 
 
