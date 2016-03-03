@@ -106,14 +106,59 @@ myMapApp.viewModel = function() {
       console.log("processGoogleResults, results = ", results);
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         myMapApp.bounds = new google.maps.LatLngBounds();
-        for (var i = 0; i < results.length; i++) {
+        //for (var i = 0; i < results.length; i++) {
+        for (var i = results.length - 1; i >= 0; i--) {
           var place = results[i];
+          //var hebrew = /[\u0590–\u05FF\uFB1D-\uFB4F]/;
+          //var hebrew = new RegExp("^[\u0590-\u05FF]+$");
+          //var hebrew = if (str.charCodeAt(0) > 0x590) && (str.charCodeAt(0) < 0x5FF)
+          var placeName = place.name;
+          var placeAddress = myMapApp.setAddress(place);
+          //address = myMapApp.setAddress(place);
+
+          //console.log("place = ", place);
+
+          //console.log("placeName = ", placeName);
+          //console.log("hebrew.test(placeName) = ", hebrew.test(placeName));
+          //if (hebrew.test(placeName)) {
+
+          // Test to see if Hebrew place name.
+          if (placeName.charCodeAt(0) > 0x590 && placeName.charCodeAt(0) < 0x5FF) {
+            console.log("Hebrew place name = ", placeName);
+            // remove the row from the array
+            results.splice(i,1);
+            continue;
+          }
+          if (placeAddress.charCodeAt(0) > 0x590 && placeAddress.charCodeAt(0) < 0x5FF) {
+            console.log("Hebrew place address = ", placeAddress);
+            results.splice(i,1);
+            continue;
+          }
+
+          // set map marker
           place.marker = myMapApp.setMapMarker(place);
-          myMapApp.bounds.extend(new google.maps.LatLng(
-            place.geometry.location.lat(),
-            place.geometry.location.lng()));
+
+          // At this point, the markers[] array is up to date with thr new markers.
+          // The map bounds should be based on all the markers, not just the newest ones from Google.
+
+
+          // extend the map bounds based on new location
+          // myMapApp.bounds.extend(new google.maps.LatLng(
+          //   place.geometry.location.lat(),
+          //   place.geometry.location.lng()));
+        }
+
+        // Loop over all markers to set bounds.
+        for (var i = 0; i < myMapApp.markers.length; i++) {
+            myMapApp.bounds.extend(myMapApp.markers[i].position);
         }
         myMapApp.map.fitBounds(myMapApp.bounds);
+        myMapApp.map.panBy(-100,0);
+
+        //var currentZoom = myMapApp.map.getZoom();
+        //myMapApp.map.setZoom(currentZoom - 1);
+        console.log("myMapApp.bounds = ", myMapApp.bounds);
+
         // this creates the CompleteList
         results.forEach(myMapApp.getAllMapData);
         myMapApp.noGooglePages++;
@@ -238,13 +283,64 @@ myMapApp.viewModel = function() {
       }
       // Correct the markers with the filtered locations
       myMapApp.deleteMarkers();
+      myMapApp.bounds = new google.maps.LatLngBounds();
       for (var i = 0; i < myMapApp.FilteredList().length; i++) {
-        myMapApp.setMapMarker(myMapApp.FilteredList()[i].place);
+        var place = myMapApp.FilteredList()[i].place;
+        place.marker = myMapApp.setMapMarker(myMapApp.FilteredList()[i].place);
+        myMapApp.bounds.extend(new google.maps.LatLng(
+            place.geometry.location.lat(),
+            place.geometry.location.lng()));
       }
+      myMapApp.map.fitBounds(myMapApp.bounds);
+      //myMapApp.offsetCenter(-100,0);
+      myMapApp.map.panBy(-100,0);
+
+      // myMapApp.bounds = new google.maps.LatLngBounds();
+      //   for (var i = 0; i < results.length; i++) {
+      //     var place = results[i];
+      //     place.marker = myMapApp.setMapMarker(place);
+      //     myMapApp.bounds.extend(new google.maps.LatLng(
+      //       place.geometry.location.lat(),
+      //       place.geometry.location.lng()));
+      //   }
+      //   myMapApp.map.fitBounds(myMapApp.bounds);
+
+
+
 
       //myMapApp.FilteredList().removeAll;
       //console.log("Empty myMapApp.FilteredList= ", myMapApp.FilteredList());
     });
+
+
+    myMapApp.offsetCenter = function (offsetx,offsety) {
+
+      // latlng is the apparent centre-point
+      // offsetx is the distance you want that point to move to the right, in pixels
+      // offsety is the distance you want that point to move upwards, in pixels
+      // offset can be negative
+      // offsetx and offsety are both optional
+
+      var latlng = myMapApp.map.getCenter();
+      var scale = Math.pow(2, map.getZoom());
+      var nw = new google.maps.LatLng(
+          map.getBounds().getNorthEast().lat(),
+          map.getBounds().getSouthWest().lng()
+      );
+
+      var worldCoordinateCenter = map.getProjection().fromLatLngToPoint(latlng);
+      var pixelOffset = new google.maps.Point((offsetx/scale) || 0,(offsety/scale) ||0)
+
+      var worldCoordinateNewCenter = new google.maps.Point(
+          worldCoordinateCenter.x - pixelOffset.x,
+          worldCoordinateCenter.y + pixelOffset.y
+      );
+
+      var newCenter = map.getProjection().fromPointToLatLng(worldCoordinateNewCenter);
+
+      map.setCenter(newCenter);
+
+    };
 
     myMapApp.getMapCenter = function() {
       var latLng = myMapApp.map.getCenter();
@@ -306,7 +402,8 @@ myMapApp.viewModel = function() {
       }
       //self.getFoursquareInfo(place);
       //console.log("marker = ", marker);
-      myMapApp.map.panTo(marker.position);
+      //myMapApp.map.panTo(marker.position);
+      //myMapApp.map.panBy(-200,0);
 
       // waits 300 milliseconds for the getFoursquare async function to finish
       //setTimeout(function() {
@@ -380,14 +477,11 @@ myMapApp.viewModel = function() {
 
 
       myMapApp.infoContent = infoContent;
-
-
       infowindow.setContent(infoContent);
-      //console.log("infowindow.open");
       infowindow.open(myMapApp.map, marker);
-
-      //console.log("panto");
       myMapApp.map.panTo(marker.position);
+      //myMapApp.map.panBy(-100,0);
+
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){marker.setAnimation(null);}, 1450);
       //console.log("Completed displayInfoWindow");
@@ -443,7 +537,7 @@ myMapApp.viewModel = function() {
               //infowindow2.setContent(wikiContent);
               //infowindow2.open(myMapApp.map, myMapApp.marker);
               //console.log(response);
-              clearTimeout(wikiRequestTimeout);
+              //clearTimeout(wikiRequestTimeout);
           },
           error: function (request, status, error) {
             alert("Unable to access wiki resources at this time.  Error message = ", request.responseText);

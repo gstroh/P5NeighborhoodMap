@@ -81,7 +81,7 @@ hr {
   /*heigth: 90%;*/
   max-width: 200px;
   min-width: 100px;
-  max-height: 93%;
+  max-height: 83%;
   margin: 1% 0 0 1%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   font-family: Roboto,Arial,sans-serif;
@@ -113,7 +113,7 @@ hr {
 @media screen and (max-width: 400px) {
     #searchMap {
         width: 5%;
-        max-height: 83%;
+        max-height: 81%;
     }
 
     #legend {
