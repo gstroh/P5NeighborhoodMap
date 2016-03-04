@@ -18,7 +18,9 @@
   <img id="menu" class="headerMenu" src="images/menu.svg" alt="menu">
   <!-- Search bar and list of filtered locations -->
   <div id="searchMap">
+    <!-- search bar -->
     <input id="search" placeholder="Enter search criteria ..." type="search" data-bind="value: myMapApp.query, valueUpdate: 'keyup'" autocomplete="off">
+    <!-- list of filtered locations that retracts when screen is too small -->
     <nav id="drawer" class="nav">
       <div id="list">
           <ul data-bind="template: {name:'listTemplate', foreach:myMapApp.FilteredList}" data-role="listview">
@@ -27,18 +29,18 @@
     </nav>
     <button id="more">More results</button>
   </div>
-  <!-- Try this -->
+  <!-- legend at bottom of display to show user how colors map to location types -->
   <div id="legend">
     <ul data-bind="template: {name:'listLegend', foreach:myMapApp.placeTypes}">
     </ul>
   </div>
 
+  <!-- This is a knockout template used for the legend -->
   <script type="text/html" id="listLegend">
      <img data-bind="attr: {'src': placeIcon}"></img>
      <span class="legendText" data-bind="text: displayPlaceType"></span>
      <input type="checkbox" data-bind="checked: checkedPlace">
   </script>
-  <!--<input type="checkbox" data-bind="checked: displayPlaceType" checked></input>-->
 
   <!-- This is a knockout template used for the filtered list of map locations -->
   <script type="text/html" id="listTemplate">
@@ -48,8 +50,8 @@
    </li>
   </script>
 
+  <!-- This script is used to open and close the drawer (filtered list) when clicking on the hamburger menu icon -->
   <script>
-      /* Open the drawer when the menu icon is clicked. */
       var menu = document.querySelector('#menu');
       var drawer = document.querySelector('.nav');
 

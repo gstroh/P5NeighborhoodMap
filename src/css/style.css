@@ -63,9 +63,11 @@ hr {
 	display: inline;
 	max-width: 800px;
 	min-width: 200px;
+  max-height: 150px;
 	position: absolute;
 	bottom: 10px;
-	left: 230px;
+	left: 10px;
+  right: 50px;
 	outline-style: double;
 }
 
@@ -76,17 +78,19 @@ hr {
 }
 
 #searchMap {
+  display: inline;
   position: absolute;
   width: 95%;
-  /*heigth: 90%;*/
+  height: auto;
   max-width: 200px;
   min-width: 100px;
   max-height: 83%;
   margin: 1% 0 0 1%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);*/
+  box-shadow: 4px 2px 6px rgba(0, 0, 0, 0.3);
   font-family: Roboto,Arial,sans-serif;
   font-size: 11px;
-  height: 100%;
+  /*height: 100%;*/
   overflow: auto;
   top: 50px;
   bottom: 20px;
@@ -97,12 +101,6 @@ hr {
   margin: 2px 0 2px 0;
 }
 
-/*.nav {
-	width: 95%;
-  	height: 100%;
-  	overflow: auto;
-}*/
-
 #list {
     background: rgba(255, 255, 255, 0.8);
   	margin: 0;
@@ -111,20 +109,14 @@ hr {
 }
 
 @media screen and (max-width: 400px) {
-    #searchMap {
-        width: 5%;
-        max-height: 81%;
-    }
-
-    #legend {
+  #searchMap {
+    width: 5%;
+  }
+  #legend {
 		left: 5px;
 	}
-
-    /*#search:focus {
-        width: 91%;
-    }*/
-
-    .nav {
+  .nav {
+    top: 40px;
     z-index: 10;
     position: absolute;
     /* This trasform moves the drawer off canvas. */
@@ -132,12 +124,12 @@ hr {
     transform: translate(-300px, 0);
     /* Optionally, we animate the drawer. */
     transition: transform 0.3s ease;
-  	}
-  	.nav.open {
-    	-webkit-transform: translate(0, 0);
-    	transform: translate(0, 0);
-  	}
-  	.headerMenu {
+  }
+  .nav.open {
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
+  }
+  .headerMenu {
     display: inline-block;
     position: absolute;
     right: 0;
@@ -150,24 +142,15 @@ hr {
 }
 
 @media screen and (min-width: 401px) {
-
-    #searchMap {
-    	width: 30%;
-    }
+  #searchMap {
+    width: 30%;
+  }
 }
 
 @media screen and (min-width: 700px) {
 	#searchMap {
 		width: 35%;
 	}
-  /*.nav {
-  	order: 0;
-    width: 30%;
-  }
-  .mapArea {
-    order: 1;
-    width: 100%;
-  }*/
 }
 
 #search {
