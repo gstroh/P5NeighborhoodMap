@@ -61,7 +61,7 @@ hr {
 
 #legend {
 	display: inline;
-	max-width: 800px;
+	max-width: 600px;
 	min-width: 200px;
   max-height: 150px;
 	position: absolute;
@@ -78,13 +78,16 @@ hr {
 }
 
 #searchMap {
-  display: inline;
+  /*display: inline;*/
+  display: inline-table;
   position: absolute;
   width: 95%;
-  height: auto;
+  /*height: auto;*/
   max-width: 200px;
   min-width: 100px;
   max-height: 83%;
+  /*max-height: 600px;*/
+  min-height: 40px;
   margin: 1% 0 0 1%;
   /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);*/
   box-shadow: 4px 2px 6px rgba(0, 0, 0, 0.3);
