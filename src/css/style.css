@@ -55,13 +55,13 @@ hr {
 	height: 100%;
 	width: 100%;
 	left: 0;
-  	position: absolute;
-  	top: 0;
+  position: absolute;
+  top: 0;
 }
 
 #legend {
 	display: inline;
-	max-width: 600px;
+	max-width: 750px;
 	min-width: 200px;
   max-height: 150px;
 	position: absolute;
@@ -77,11 +77,17 @@ hr {
 	font-size: 14px;
 }
 
-#searchMap {
-  /*display: inline;*/
+.nav {
   display: inline-table;
+}
+
+#searchMap {
+  overflow: auto;
+  /* inline-table creates a table of flexible height, but no scrolling */
+  /* inline create a list with scrolling, but the height is absolute */
+  display: inline-block;
   position: absolute;
-  width: 95%;
+  /*width: 95%;*/
   /*height: auto;*/
   max-width: 200px;
   min-width: 100px;
@@ -90,14 +96,20 @@ hr {
   min-height: 40px;
   margin: 1% 0 0 1%;
   /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);*/
-  box-shadow: 4px 2px 6px rgba(0, 0, 0, 0.3);
+  /*box-shadow: 4px 2px 6px rgba(0, 0, 0, 0.3);*/
   font-family: Roboto,Arial,sans-serif;
   font-size: 11px;
-  /*height: 100%;*/
-  overflow: auto;
   top: 50px;
   bottom: 20px;
+  /*height: 100%;*/
+  /*display: inline;*/
 }
+
+/*.listArea {
+  display: inline-block;
+  overflow: auto;
+  max-height: 200px;
+}*/
 
 #more {
   width: 100%;
@@ -109,11 +121,12 @@ hr {
   	margin: 0;
   	border: 1px solid rgba(0, 0, 0, 0.1);
   	padding: 0px;
+    /*overflow: auto;*/
 }
 
 @media screen and (max-width: 400px) {
   #searchMap {
-    width: 5%;
+    width: 25%;
   }
   #legend {
 		left: 5px;
@@ -127,10 +140,12 @@ hr {
     transform: translate(-300px, 0);
     /* Optionally, we animate the drawer. */
     transition: transform 0.3s ease;
+    /*display: inline-table;*/
   }
   .nav.open {
     -webkit-transform: translate(0, 0);
     transform: translate(0, 0);
+    /*display: inline;*/
   }
   .headerMenu {
     display: inline-block;
@@ -147,6 +162,7 @@ hr {
 @media screen and (min-width: 401px) {
   #searchMap {
     width: 30%;
+    max-height: 80%;
   }
 }
 
@@ -171,8 +187,8 @@ hr {
 #search:focus {
     border-color: #4d90fe;
     margin-left: -1px;
-    padding-left: 14px;
-    width: 301px;
+    padding-left: 5px;
+    /*width: 301px;*/
 }
 
 #type-selector {

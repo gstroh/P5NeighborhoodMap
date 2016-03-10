@@ -246,6 +246,11 @@ myMapApp.viewModel = function() {
 
             moreButton.addEventListener('click', function() {
               console.log("more button event listener");
+              // Change the searchMap ID to inline to allow scrolling
+              // var searchMap = document.getElementById("searchMap");
+              // console.log("searchMap = ", searchMap);
+              // searchMap.style.display = "inline";
+
               moreButton.disabled = true;
               // if (pagination.hasNextPage) {
               //   console.log("** pagination has next page", pagination);
