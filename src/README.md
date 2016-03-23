@@ -1,17 +1,17 @@
-## Website Performance Optimization Portfolio Project
+## Neighborhood Map Project
 
-The purpose of this project is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques I've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
+The purpose of this project is to create an application to display a neighborhood map using the Google Maps API by applying the techniques I've picked up in the [Intro to AJAX course](https://www.udacity.com/course/ud110) and in the [Javascript Design Patterns course](https://www.udacity.com/course/ud989).  I additionaly use the Flickr API for images and the Wikipedia API for articles about the locations on my map.
 
 To get started, check out the repository to inspect the code and check out the deployed application on gh-pages:
 
-* [Github code repository](https://github.com/gstroh/frontend-nanodegree-mobile-portfolio)
-* [Deployed application on gh-pages](http://gstroh.github.io/frontend-nanodegree-mobile-portfolio/)
+* [Github code repository](https://github.com/gstroh/P5NeighborhoodMap)
+* [Deployed application on gh-pages](http://gstroh.github.io/P5NeighborhoodMap/)
 
-### Application Changes
+### The Jerusalem Map
 
-#### Part 1: Optimize PageSpeed Insights score (96 Desktop, 95 Mobile) for index.html
+#### Map Navigation
 
-Here's a list of the performance improvements I made in index.html:
+The map is centered in the old city of Jerusalem.  It collects locations from the Google Maps API within a 2 mile radius that have an English name (note: locations with Hebrew-only names are eliminated).  Locations are color coded and displayed in a legend at the bottom of the screen: ![(Legend)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/images/legend.png?raw=true "Legend")
 
 1. Used async in JS where applicable to prevent blocking in all html.
 1. Added media="print" on print.css declaration to prevent CRP blocking.
@@ -49,10 +49,9 @@ Per instructions for this project, the following directories were used for sourc
 The following grunt plugins were used to automatically perform optimizations, minification, pushing changes to Github, remove unused CSS, copy files and create images of multiple sizes and quality.
 
 * grunt
-* grunt-responsive-images
+* grunt-contrib-imagemin
 * grunt-contrib-cssmin
 * grunt-contrib-htmlmin
-* grunt-contrib-imagemin
 * grunt-contrib-uglify
 * grunt-uncss
 * grunt-gh-pages
@@ -71,7 +70,7 @@ The following commands were used in the terminal application (Mac) in the applic
 
 Explanation of commands:
 
-1. Use grunt to automate resizing of images, optimization of images, copying files and minification of html, css and js.
+1. Use grunt to automate copying files and minification of html, css and js.
 1. Commit the current changes to git.
 1. Push the changes to Github.
 1. Use grunt-gh-pages to deploy the application to gh-pages.
