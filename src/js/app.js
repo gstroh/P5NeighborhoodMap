@@ -237,6 +237,12 @@ myMapApp.viewModel = function() {
         results.forEach(myMapApp.getAllMapData);
         // increment the number of Google results pages that have been processed
         myMapApp.noGooglePages++;
+        // process the second page
+        if (myMapApp.noGooglePages == 1) {
+          pagination.nextPage();
+        }
+        // pagination.nextPage();
+        // myMapApp.noGooglePages++;
         // process multiple pages
         if (myMapApp.noGooglePages < 3) {
             //console.log("pagination has next page", pagination);
@@ -447,6 +453,7 @@ myMapApp.viewModel = function() {
       var width = $(window).width();
       // pan the map center if the locations list is showing
       if (width > 400) {
+        console.log("panBy(-100,0)");
         myMapApp.map.panBy(-100,0);
       }
       google.maps.event.trigger(myMapApp.map, "resize");
@@ -515,8 +522,14 @@ myMapApp.viewModel = function() {
       myMapApp.infowindow.setContent(infoContent);
       myMapApp.infowindow.open(myMapApp.map, marker);
       // pan to the marker selected
+      console.log("marker.position = ", marker.position.lat());
       myMapApp.map.panTo(marker.position);
-      //myMapApp.map.panBy(-100,0);
+      // adjust the position to allow the inforWindow to fit in smaller screens
+      var width = $(window).width();
+      if (width <= 500) {
+        console.log("panBy(-100,-125)");
+        myMapApp.map.panBy(-100,-150);
+      }
       // set the marker animation
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){marker.setAnimation(null);}, 1450);

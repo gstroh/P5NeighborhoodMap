@@ -77,14 +77,16 @@ hr {
 	font-size: 14px;
 }
 
-.nav {
-  display: inline-table;
-}
+/*.nav {
+  overflow: auto;
+}*/
 
 #searchMap {
   overflow: auto;
+
   /* inline-table creates a table of flexible height, but no scrolling */
   /* inline create a list with scrolling, but the height is absolute */
+  /*display: inline-block;*/
   display: inline-block;
   position: absolute;
   /*width: 95%;*/
@@ -106,9 +108,7 @@ hr {
 }
 
 /*.listArea {
-  display: inline-block;
   overflow: auto;
-  max-height: 200px;
 }*/
 
 #more {
@@ -122,6 +122,24 @@ hr {
   	border: 1px solid rgba(0, 0, 0, 0.1);
   	padding: 0px;
     /*overflow: auto;*/
+}
+
+/*@media screen and (overflow-block: ) {
+  #searchMap {
+    display: inline;
+  }
+}*/
+
+@media screen and (max-height: 800px) {
+  #legend {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  #legend {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 400px) {
@@ -162,7 +180,7 @@ hr {
 @media screen and (min-width: 401px) {
   #searchMap {
     width: 30%;
-    max-height: 80%;
+    /*max-height: 80%;*/
   }
 }
 
