@@ -1,6 +1,6 @@
 ## Neighborhood Map Project
 
-The purpose of this project is to create an application to display a neighborhood map using the Google Maps API by applying the techniques I've picked up in the [Intro to AJAX course](https://www.udacity.com/course/ud110) and in the [Javascript Design Patterns course](https://www.udacity.com/course/ud989).  I additionaly use the Flickr API for images and the Wikipedia API for articles about the locations on my map.
+The purpose of this project is to create an application to display a neighborhood map using the Google Maps API by applying the techniques I've picked up in the [Intro to AJAX course](https://www.udacity.com/course/ud110) and in the [Javascript Design Patterns course](https://www.udacity.com/course/ud989).   I additionaly use the Flickr API for images and the Wikipedia API for articles about the locations on my map.  Knockout was utilized to implement the Model-View-View-Model (MVVM) pattern of JavaScript code design.
 
 To get started, check out the repository to inspect the code and check out the deployed application on gh-pages:
 
@@ -11,34 +11,59 @@ To get started, check out the repository to inspect the code and check out the d
 
 #### Map Navigation
 
-The map is centered in the old city of Jerusalem.  It collects locations from the Google Maps API within a 2 mile radius that have an English name (note: locations with Hebrew-only names are eliminated).  Locations are color coded and displayed in a legend at the bottom of the screen: ![(Legend)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/images/legend.png?raw=true "Legend")
+The map is centered in the old city of Jerusalem.  It collects locations from the Google Maps API within a 2 mile radius that have an English name (note: locations with Hebrew-only names are eliminated).  Locations are color coded and displayed in a legend at the bottom of the screen:
 
-1. Used async in JS where applicable to prevent blocking in all html.
-1. Added media="print" on print.css declaration to prevent CRP blocking.
-1. Resize and optimize the huge pizzeria.jpg file.
-1. Used a media query for pizzeria.jpg and scrset to allow browser to choose image size based on viewport width and display quality (1x/2x).
-1. Optimize all images.
-1. Inline style.css in index.html.
-1. Inline font through JS code after footer in index.html.
-1. Did not inline perfmatter.js due to use of async.
-1. Combine pizza.html stylesheets style.css and bootstrap-grid.css.  Used grunt-uncss to remove unused css in both files.  Inlined combined CSS file.
-1. Changed project-2048.html to reference local copy of img/2048.png.  Also, optimized it.
-1. Minified all css with grunt-contrib-cssmin.
-1. Minified all html with grunt-contrib-htmlmin.
-1. Minified all js with grunt-uglify.
-1. Compressed all images with grunt-contrib-imagemin.
-1. Created smaller images of pizzeria.jpg with grunt-resonsive-images.
+![(Legend)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/legend.png?raw=true "Legend")
 
-#### Part 2: Optimize Frames per Second in pizza.html
+There is a checkbox next to each location type in the legend.  Use this checkbox to eliminate or add back this type of location to the map.  On small devices the legend does not appear.
 
-Following is a list of changes I made to ensure the frame rate while scrolling in pizza.html is 60fps or better:
+On the left of the screen is a list of map locations.
 
-1. Complete rewrite of function changePizzaSizes in main.js.  Eliminate unnecessary code and code causing render blocking.
-1. Changed function updatePositions in main.js to move scrollTop out of the loop.  It caused Layout.
-1. Replaced querySelectorAll with getElementsByClassName.  More performant.
-1. Used requestAnimationFrame for animation of pizzas on screen.  Put call to requestAnimationFrame inside new function renderPositions.
-1. Replaced use of CSS basicLeft property with transform translateX property in function updatePositions in main.js.
-1. Add will-change: transform to mover class in style.css inlined in pizza.html.
+![(Scroll Bar)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/scrollBar.png?raw=true "Scroll Bar")
+
+You may select a location by using the scroll bar or by selecting the marker on the map.  When selecting a location, the following information window will appear:
+
+![(Info Window)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/infowindow.png?raw=true "Info Window")
+
+The information window displays the following information:
+
+* The name of the location
+* The address of the location
+* The Google Map location type
+* A Flickr photo of the location if available
+* A button to request Wiki Articles
+
+If the Wiki Articles button is selected and article(s) about that location are found, a display similar to this appears:
+
+![(Info Window Wiki)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/infowindowWiki.png?raw=true "Info Window Wiki")
+
+Select the desired article and it will appear in a separate browser tab.
+
+To search locations by name, use the search bar at the top of the scroll bar:
+
+![(Search)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/search.png?raw=true "Search")
+
+As search criteria are typed into the search bar, the locations on the map will reflect this search criteria.
+
+When the map is initially displayed, it retrieves two groups of locations from Google Maps.  An additional group of locations can be retrieved my selecting the More Results button:
+
+![(More Results)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/moreResults.png?raw=true "More Results")
+
+When the maximum results have been displayed, this button will be greyed out and can no longer be selected.
+
+
+#### Map Navigation on Small Devices
+
+On small devices, such as phones, the map will display as follows:
+
+![(Small Map)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/smallMap.png?raw=true "Small Map")
+
+The More Results button is now at the top of the scroll bar on the left of the screen.  The locations scroll bar is not displayed to save room.  To display the locations, selected the hamburger icon on the upper right of the screen:
+
+![(Small Map Scroll Bar)](https://github.com/gstroh/P5NeighborhoodMap/blob/master/src/images/smallMapScrollBar.png?raw=true "Small Map Scroll Bar")
+
+Selecting the hamburger icon again will make the locations scroll bar to be removed.
+
 
 ### Project file structure
 
