@@ -212,11 +212,14 @@ myMapApp.viewModel = function() {
         }
         // process multiple pages
         if (myMapApp.noGooglePages < 3) {
-            //console.log("pagination has next page", pagination);
             var moreButton = document.getElementById('more');
             moreButton.disabled = false;
             moreButton.addEventListener('click', function() {
               moreButton.disabled = true;
+              // If the user has used the legend checkboxes, set them all to TRUE
+              // before displaying the next page of results.
+              myMapApp.setCheckedPlaceTrue();
+              // Get the next page of results.
               pagination.nextPage();
             });
         }
