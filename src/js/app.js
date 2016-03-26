@@ -5,7 +5,6 @@ var myMapApp = myMapApp || { };
 
 myMapApp.viewModel = function() {
     // initialize some variables
-    //console.log("viewModel");
     myMapApp.Jerusalem = new google.maps.LatLng(31.776347, 35.231446);
     myMapApp.infowindow = null;
     myMapApp.markers = [];
@@ -32,7 +31,7 @@ myMapApp.viewModel = function() {
     myMapApp.placeTypes.push({displayPlaceType: "Park", googleType: "park", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"});
 
 // The init function includes the model, view model and view.  The model is generated using Google
-// Maps API.  Locations are gathered based on a 2 mile radius from a center point in Jerusalem and the
+// Maps API.  Locations are gathered based on a 2 mile radius from a center point in old Jerusalem and the
 // place types I selected.  But, Google Maps is also a major part of the view.  Knockout handles much
 // of the view model with observables.  Therefore, in the application it is impossible to clearly split
 // out the model, view model and view.
@@ -80,46 +79,23 @@ myMapApp.viewModel = function() {
 
     // a change has occurred to the checkedPlace field in the legend
     myMapApp.checkedPlaceChange = function(NewValue){
-      console.log("checkedPlaceChange", NewValue);
-      // set search query to null string
-      //var sq = ko.observable("query");
-      // if (myMapApp.query() != "") {
-      //   console.log("query = ", myMapApp.query());
-      //   myMapApp.query("");
-      // }
-      // myMapApp.deleteMarkers();
-      // myMapApp.FilteredList.removeAll();
-      // myMapApp.CompleteList.removeAll();
-      // myMapApp.getGooglePlaceTypes();
-      // myMapApp.getPlacesFromGoogleMaps();
-
-      // myMapApp.query("");
-      // //alert('An items name property change to '+NewValue);
-      // create a copy of FilteredList with types checked in legend
+      // create a new copy of FilteredList with types checked in legend
       var NewFilteredList = ko.observableArray();
       for (var i = 0; i < myMapApp.CompleteList().length; i++) {
-          // console.log("FilteredList = ", myMapApp.FilteredList());
-          // console.log("googleTypes = ", myMapApp.googleTypes);
-          // console.log("place types = ", myMapApp.placeTypes());
           for (var j = 0; j < myMapApp.placeTypes().length; j++) {
-            // console.log("myMapApp.placeTypes()[j].checkedPlace = ", myMapApp.placeTypes()[j].checkedPlace());
-            // console.log("myMapApp.FilteredList()[i].types[0] = ", myMapApp.FilteredList()[i].types[0]);
-            // console.log("myMapApp.googleTypes[j] = ", myMapApp.googleTypes[j]);
             if (myMapApp.placeTypes()[j].checkedPlace()  == true &&
                 myMapApp.CompleteList()[i].types[0] == myMapApp.googleTypes[j]) {
-              // console.log("** PUSH **");
               NewFilteredList.push( myMapApp.CompleteList()[i] );
             }
           }
       }
-      console.log("display New FilteredList");
+      // display the new Filtered List
       myMapApp.displayFilteredList(NewFilteredList);
     };
 
 
     // set the checked place field in the legend to true
     myMapApp.setCheckedPlaceTrue = function () {
-      console.log("set CheckedPlaceTrue");
       for (var i = 0; i < myMapApp.placeTypes().length; i++) {
         if (myMapApp.placeTypes()[i].checkedPlace() == false) {
           myMapApp.placeTypes()[i].checkedPlace(true);
@@ -130,8 +106,6 @@ myMapApp.viewModel = function() {
 
     // set the checked place field in the legend to logical input (true/false)
     myMapApp.setCheckedPlaceDisabled = function (logical) {
-      console.log("set CheckedPlaceDisabled");
-
       var legend = document.getElementsByClassName("legendCheckBox");
       console.log("legend = ", legend);
       for (var i = 0; i < legend.length; i++) {
@@ -160,7 +134,6 @@ myMapApp.viewModel = function() {
       }
       // center the map
       myMapApp.centerMap();
-      console.log("finished displayFiltered List");
     }
 
 
@@ -172,7 +145,6 @@ myMapApp.viewModel = function() {
           myMapApp.googleTypes.push(myMapApp.placeTypes()[i].googleType);
         }
       }
-      //console.log("myMapApp.googleTypes = ", myMapApp.googleTypes);
     };
 
     // Get map locations from Google maps by doing a nearbySearch of Jerusalem for a radius of 2 miles.
@@ -209,17 +181,14 @@ myMapApp.viewModel = function() {
         for (var i = results.length - 1; i >= 0; i--) {
           var place = results[i];
           var placeName = place.name;
-          //console.log("placeName = ", placeName);
           var placeAddress = myMapApp.setAddress(place);
           // Test to see if Hebrew place name and remove it.
           if (myMapApp.isHebrew(placeName)) {
-            //console.log("Hebrew place name = ", placeName);
             results.splice(i,1);
             continue;
           }
           // Test to see if Hebrew place address and remove it.
           if (myMapApp.isHebrew(placeAddress)) {
-            //console.log("Hebrew place address = ", placeAddress);
             results.splice(i,1);
             continue;
           }
@@ -241,44 +210,22 @@ myMapApp.viewModel = function() {
         if (myMapApp.noGooglePages == 1) {
           pagination.nextPage();
         }
-        // pagination.nextPage();
-        // myMapApp.noGooglePages++;
         // process multiple pages
         if (myMapApp.noGooglePages < 3) {
             //console.log("pagination has next page", pagination);
             var moreButton = document.getElementById('more');
-
             moreButton.disabled = false;
-
             moreButton.addEventListener('click', function() {
-              console.log("more button event listener");
-              // Change the searchMap ID to inline to allow scrolling
-              // var searchMap = document.getElementById("searchMap");
-              // console.log("searchMap = ", searchMap);
-              // searchMap.style.display = "inline";
-
               moreButton.disabled = true;
-              // if (pagination.hasNextPage) {
-              //   console.log("** pagination has next page", pagination);
               pagination.nextPage();
-              // } else {
-              //   moreButton.disabled = true;
-              // }
-
             });
         }
-        // if (pagination.hasNextPage) {
-        //   console.log("pagination has next page", pagination);
-        //   //console.log("pagination");
-        //   pagination.nextPage();
-        // }
       } else {
           // error connecting to Google Maps
           console.error(status);
           alert("Unable to access Google Maps.  Status message = " + status);
           return;
       }
-      //console.log("myMapApp.markers = ", myMapApp.markers);
     };
 
 
@@ -295,11 +242,8 @@ myMapApp.viewModel = function() {
     // set a single map marker
     myMapApp.setMapMarker = function (place) {
         var placeType = place.types[0];
-        //console.log("placeType = ", placeType);
         // find the place icon file address located in the googleTypes array
         for (var i = 0; i < myMapApp.placeTypes().length; i++) {
-          //console.log("placeType = ", placeType);
-          //console.log("myMapApp.placeTypes()[i].googleType = ", myMapApp.placeTypes()[i].googleType);
           if (placeType == myMapApp.placeTypes()[i].googleType) {
             var placeIconFile = myMapApp.placeTypes()[i].placeIcon;
             break;
@@ -333,14 +277,13 @@ myMapApp.viewModel = function() {
     // create the Complete & Filtered Lists of map data
     myMapApp.getAllMapData = function(place) {
       // Google place input param
-      //console.log("getAllMapData", place);
       var myMapLocation = {};
       myMapLocation.place_id = ko.observable(place.place_id);
       myMapLocation.position = ko.observable(place.geometry.location.toString());
       myMapLocation.name = ko.observable(place.name);
       myMapLocation.place = place;
       myMapLocation.types = place.types;
-
+      // address
       var address;
       address = myMapApp.setAddress(place);
       myMapLocation.address = ko.observable(address);
@@ -407,35 +350,24 @@ myMapApp.viewModel = function() {
         imagesRecord.imagesArray = imagesArray;
         myMapApp.flickrPhotos.push(imagesRecord);
       };
-
     };
 
 
     // Filter the search query field
     myMapApp.query.subscribe (function(newValue) {
-      console.log("query.subscribe, newValue = ", newValue);
       if (newValue.length > 0) {
         myMapApp.setCheckedPlaceTrue();
         myMapApp.setCheckedPlaceDisabled(true);
       } else {
         myMapApp.setCheckedPlaceDisabled(false);
       }
-
-      // set all place types in legend to TRUE if non-blank search query
-      // if (myMapApp.query() != "") {
-      //       myMapApp.setCheckedPlaceTrue();
-      // }
       // use knockout to filter the Complete List and create the Computed List
       myMapApp.ComputedList = ko.computed(function() {
-        console.log("Inside query.subscribe ComputedList def");
         var filter = myMapApp.query().toLowerCase();
         if (myMapApp.query() === "") {
-            //console.log("No filter", filter);
             // return the complete list
             return myMapApp.CompleteList();
         } else {
-            //myMapApp.setCheckedPlaceTrue();
-            //myMapApp.setCheckedPlaceDisabled();
             return ko.utils.arrayFilter(myMapApp.CompleteList(), function(item) {
               //find the filter string in the name
               return item.name().toLowerCase().indexOf(filter)>-1;
@@ -453,7 +385,6 @@ myMapApp.viewModel = function() {
       var width = $(window).width();
       // pan the map center if the locations list is showing
       if (width > 400) {
-        console.log("panBy(-100,0)");
         myMapApp.map.panBy(-100,0);
       }
       google.maps.event.trigger(myMapApp.map, "resize");
@@ -502,7 +433,6 @@ myMapApp.viewModel = function() {
       }
       // if no photo found, tell the user
       if (photoURL.length == 0) {
-        //photoURL = "<div>No Flickr photos found for " + placeName + ".</div>";
         photoURL = "No Flickr photos found for " + placeName + ".";
       }
       // find the display place type
@@ -522,12 +452,14 @@ myMapApp.viewModel = function() {
       myMapApp.infowindow.setContent(infoContent);
       myMapApp.infowindow.open(myMapApp.map, marker);
       // pan to the marker selected
-      console.log("marker.position = ", marker.position.lat());
       myMapApp.map.panTo(marker.position);
       // adjust the position to allow the inforWindow to fit in smaller screens
+      // I'm not in love with this solution to my display, but was unable to figure
+      // out how to do this in CSS.  Also, it is not a pleasant visual experience, as
+      // the screen jitters with two pan commands so close together.  I did not have time
+      // to figure out a better solution.  GS 3/26/2016
       var width = $(window).width();
       if (width <= 500) {
-        console.log("panBy(-100,-125)");
         myMapApp.map.panBy(-100,-150);
       }
       // set the marker animation
@@ -556,7 +488,6 @@ myMapApp.viewModel = function() {
                   // This leaves the map app screen unchanged when the user returns.
                   wikiArticles.push('<li><a href="' + url + '" target="_blank">' + articleStr + '</a></li>');
               };
-              //console.log("no of wiki articles = ", articleList.length);
               // put the wiki content to display in the inforwindow into a single string for display
               var wikiContent = "";
               if (articleList.length > 0) {
