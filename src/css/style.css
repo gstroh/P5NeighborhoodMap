@@ -1,9 +1,11 @@
 html {
-	height: 100%
+    height: 100%
 }
 
 body {
-	height: 100%; margin: 0; padding: 0
+    height: 100%;
+    margin: 0;
+    padding: 0
 }
 
 h2 {
@@ -43,151 +45,135 @@ hr {
 }
 
 .content {
-  	display: flex;
-  	flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .headerMenu {
-  	display: none;
+    display: none;
 }
 
 #map {
-	height: 100%;
-	width: 100%;
-	left: 0;
-  position: absolute;
-  top: 0;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
 }
 
 #legend {
-	display: inline;
-	max-width: 750px;
-	min-width: 200px;
-  max-height: 150px;
-	position: absolute;
-	bottom: 10px;
-	left: 10px;
-  right: 50px;
-	outline-style: double;
+    display: inline;
+    max-width: 750px;
+    min-width: 200px;
+    max-height: 150px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 50px;
+    outline-style: double;
 }
 
 .legendText {
-	font-weight: bold;
-	font-family: Roboto,Arial,sans-serif;
-	font-size: 14px;
+    font-weight: bold;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 14px;
 }
-
-/*.nav {
-  overflow: auto;
-}*/
 
 #searchMap {
-  overflow: auto;
+    overflow: auto;
+    /* inline-table creates a table of flexible height, but no scrolling */
+    /* inline create a list with scrolling, but the height is absolute */
+    /*display: inline-block;*/
 
-  /* inline-table creates a table of flexible height, but no scrolling */
-  /* inline create a list with scrolling, but the height is absolute */
-  /*display: inline-block;*/
-  display: inline-block;
-  position: absolute;
-  /*width: 95%;*/
-  /*height: auto;*/
-  max-width: 200px;
-  min-width: 100px;
-  max-height: 83%;
-  /*max-height: 600px;*/
-  min-height: 40px;
-  margin: 1% 0 0 1%;
-  /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);*/
-  /*box-shadow: 4px 2px 6px rgba(0, 0, 0, 0.3);*/
-  font-family: Roboto,Arial,sans-serif;
-  font-size: 11px;
-  top: 50px;
-  bottom: 20px;
-  /*height: 100%;*/
-  /*display: inline;*/
+    display: inline-block;
+    position: absolute;
+
+    max-width: 200px;
+    min-width: 100px;
+    max-height: 83%;
+
+    min-height: 40px;
+    margin: 1% 0 0 1%;
+
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 11px;
+    top: 50px;
+    bottom: 20px;
 }
 
-/*.listArea {
-  overflow: auto;
-}*/
-
 #more {
-  width: 100%;
-  margin: 2px 0 2px 0;
+    width: 100%;
+    margin: 2px 0 2px 0;
 }
 
 #list {
     background: rgba(255, 255, 255, 0.8);
-  	margin: 0;
-  	border: 1px solid rgba(0, 0, 0, 0.1);
-  	padding: 0px;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0px;
     /*overflow: auto;*/
 }
 
-/*@media screen and (overflow-block: ) {
-  #searchMap {
-    display: inline;
-  }
-}*/
-
 @media screen and (max-height: 800px) {
-  #legend {
-    display: none;
-  }
+    #legend {
+        display: none;
+    }
 }
 
 @media screen and (max-width: 430px) {
-  #legend {
-    display: none;
-  }
+    #legend {
+        display: none;
+    }
 }
 
 @media screen and (max-width: 400px) {
-  #searchMap {
-    width: 25%;
-  }
-  #legend {
-		left: 5px;
-	}
-  .nav {
-    top: 40px;
-    z-index: 10;
-    position: absolute;
-    /* This trasform moves the drawer off canvas. */
-    -webkit-transform: translate(-300px, 0);
-    transform: translate(-300px, 0);
-    /* Optionally, we animate the drawer. */
-    transition: transform 0.3s ease;
-    /*display: inline-table;*/
-  }
-  .nav.open {
-    -webkit-transform: translate(0, 0);
-    transform: translate(0, 0);
-    /*display: inline;*/
-  }
-  .headerMenu {
-    display: inline-block;
-    position: absolute;
-    right: 0;
-    padding: 1em;
-  }
-  .headerMenu svg {
-    width: 32px;
-    fill: #E0E0E0;
-  }
+    #searchMap {
+        width: 25%;
+    }
+    #legend {
+        left: 5px;
+    }
+    .nav {
+        top: 40px;
+        z-index: 10;
+        position: absolute;
+        /* This trasform moves the drawer off canvas. */
+
+        -webkit-transform: translate(-300px, 0);
+        transform: translate(-300px, 0);
+        /* Optionally, we animate the drawer. */
+
+        transition: transform 0.3s ease;
+        /*display: inline-table;*/
+    }
+    .nav.open {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+        /*display: inline;*/
+    }
+    .headerMenu {
+        display: inline-block;
+        position: absolute;
+        right: 0;
+        padding: 1em;
+    }
+    .headerMenu svg {
+        width: 32px;
+        fill: #E0E0E0;
+    }
 }
 
 @media screen and (min-width: 401px) {
-  #searchMap {
-    width: 30%;
-    /*max-height: 80%;*/
-  }
+    #searchMap {
+        width: 30%;
+        /*max-height: 80%;*/
+    }
 }
 
 @media screen and (min-width: 700px) {
-	#searchMap {
-		width: 35%;
-	}
+    #searchMap {
+        width: 35%;
+    }
 }
 
 #search {
