@@ -13,9 +13,7 @@ myMapApp.viewModel = function() {
     myMapApp.query = ko.observable("");
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
-    moreEnable = ko.observable(true);
-    wikiEnable = ko.observable(true);
-    visibleWikiButton = ko.observable(false);
+    myMapApp.moreEnable = ko.observable(true);
     myMapApp.flickrPhotos = [];
     myMapApp.noGooglePages = 0;
 
@@ -110,11 +108,9 @@ myMapApp.viewModel = function() {
     // set the checked place field in the legend to logical input (true/false)
     myMapApp.setCheckedPlaceDisabled = function (logical) {
       // var legend = document.getElementsByClassName("legendCheckBox");
-      // console.log("legend = ", legend);
       // for (var i = 0; i < legend.length; i++) {
       //   legend[i].disabled = logical;
       // }
-      console.log("setCheckedPlaceDisabled, logical = ", logical);
       // The enbale binding is specified in declaring this Knockout variable.
       // So, I need to flip the logical before applying it to disable the checkboxes.
       var flipLogical = !logical;
@@ -225,12 +221,12 @@ myMapApp.viewModel = function() {
         if (myMapApp.noGooglePages < 3) {
             // var moreButton = document.getElementById('more');
             // moreButton.disabled = false;
-            moreEnable(true);
+            myMapApp.moreEnable(true);
 
             // Click on the More button.
             // Had to include in this context for pagination variable.
             myMapApp.clickMore = function() {
-              moreEnable(false);
+              myMapApp.moreEnable(false);
               //moreButton.disabled = true;
               // If the user has used the legend checkboxes, set them all to TRUE
               // before displaying the next page of results.
@@ -343,7 +339,6 @@ myMapApp.viewModel = function() {
       // If fails, notify user.
       $.getJSON(searchUrl)
         .done(function(data) {
-          //console.log("** AJAX SUCCESS **");
           if (data.photos.photo.length > 0) {
             flickrPhotosArray = getImages(data);
             storeImages(flickrPhotosArray);
@@ -480,12 +475,6 @@ myMapApp.viewModel = function() {
       myMapApp.infoContent = infoContent;
       myMapApp.infowindow.setContent(infoContent);
       myMapApp.infowindow.open(myMapApp.map, marker);
-
-      // var button = document.createElement("div");
-      // button.innerHTML = '<button id="wiki" data-bind="enable: wikiEnable, click: myMapApp.displayWikiArticles">Wiki Articles</button>';
-      // ko.applyBindings(new myMapApp.viewModel(), button);
-      //ko.applyBindings(new myMapApp.viewModel());
-      //ko.applyBindings(new infoContent);
       // pan to the marker selected
       myMapApp.map.panTo(marker.position);
       // adjust the position to allow the inforWindow to fit in smaller screens
@@ -507,7 +496,6 @@ myMapApp.viewModel = function() {
 
     // display any wiki articles on the given location
     myMapApp.displayWikiArticles = function () {
-      console.log("displayWikiArticles");
       var wikiArticles = [];
       var searchString = myMapApp.marker.title;
       var wikiURL =   'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + searchString +
@@ -539,8 +527,8 @@ myMapApp.viewModel = function() {
               // display the wiki articles below the current content
               myMapApp.infowindow.setContent(myMapApp.infoContent + wikiContent);
               // once the wiki articles have been displayed, disable the button
-              var wikiButton = document.getElementById('wiki');
-              wikiButton.disabled = true;
+              // var wikiButton = document.getElementById('wiki');
+              // wikiButton.disabled = true;
               //wikiEnable(false);
           },
           // process any error with the wiki ajax request
@@ -568,6 +556,8 @@ myMapApp.viewModel = function() {
 
 };
 
+// Moved this to googleSuccess function defined in index.html.  GS 3/29/16
+// Only call/start app once asynchronous call to Google maps completed.
 // apply knockout bindings to the view model
 // $(function(){
 //   ko.applyBindings(new myMapApp.viewModel());
