@@ -13,6 +13,9 @@ myMapApp.viewModel = function() {
     myMapApp.query = ko.observable("");
     myMapApp.CompleteList = ko.observableArray();
     myMapApp.FilteredList = ko.observableArray();
+    moreEnable = ko.observable(true);
+    wikiEnable = ko.observable(true);
+    visibleWikiButton = ko.observable(false);
     myMapApp.flickrPhotos = [];
     myMapApp.noGooglePages = 0;
 
@@ -23,12 +26,12 @@ myMapApp.viewModel = function() {
     // The folowing knockout array is also used to define place types, checked boxes and icons used in the application
     myMapApp.placeTypes = ko.observableArray();
     // add plave types to ko.observable array
-    myMapApp.placeTypes.push({displayPlaceType: "Church", googleType: "church", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Mosque", googleType: "mosque", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Museum", googleType: "museum", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Place of Worship", googleType: "place_of_worship", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Synagogue", googleType: "synagogue", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"});
-    myMapApp.placeTypes.push({displayPlaceType: "Park", googleType: "park", checkedPlace: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Church", googleType: "church", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Mosque", googleType: "mosque", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Museum", googleType: "museum", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Place of Worship", googleType: "place_of_worship", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true), placeIcon: "http://maps.google.com/mapfiles/ms/icons/pink-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Synagogue", googleType: "synagogue", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true),placeIcon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"});
+    myMapApp.placeTypes.push({displayPlaceType: "Park", googleType: "park", checkedPlace: ko.observable(true), checkedEnable: ko.observable(true),placeIcon: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"});
 
 // The init function includes the model, view model and view.  The model is generated using Google
 // Maps API.  Locations are gathered based on a 2 mile radius from a center point in old Jerusalem and the
@@ -106,11 +109,19 @@ myMapApp.viewModel = function() {
 
     // set the checked place field in the legend to logical input (true/false)
     myMapApp.setCheckedPlaceDisabled = function (logical) {
-      var legend = document.getElementsByClassName("legendCheckBox");
-      console.log("legend = ", legend);
-      for (var i = 0; i < legend.length; i++) {
-        legend[i].disabled = logical;
+      // var legend = document.getElementsByClassName("legendCheckBox");
+      // console.log("legend = ", legend);
+      // for (var i = 0; i < legend.length; i++) {
+      //   legend[i].disabled = logical;
+      // }
+      console.log("setCheckedPlaceDisabled, logical = ", logical);
+      // The enbale binding is specified in declaring this Knockout variable.
+      // So, I need to flip the logical before applying it to disable the checkboxes.
+      var flipLogical = !logical;
+      for (var i = 0; i < myMapApp.placeTypes().length; i++) {
+        myMapApp.placeTypes()[i].checkedEnable(flipLogical);
       }
+
     }
 
 
@@ -212,16 +223,29 @@ myMapApp.viewModel = function() {
         }
         // process multiple pages
         if (myMapApp.noGooglePages < 3) {
-            var moreButton = document.getElementById('more');
-            moreButton.disabled = false;
-            moreButton.addEventListener('click', function() {
-              moreButton.disabled = true;
+            // var moreButton = document.getElementById('more');
+            // moreButton.disabled = false;
+            moreEnable(true);
+
+            // Click on the More button.
+            // Had to include in this context for pagination variable.
+            myMapApp.clickMore = function() {
+              moreEnable(false);
+              //moreButton.disabled = true;
               // If the user has used the legend checkboxes, set them all to TRUE
               // before displaying the next page of results.
               myMapApp.setCheckedPlaceTrue();
               // Get the next page of results.
               pagination.nextPage();
-            });
+            };
+            // moreButton.addEventListener('click', function() {
+            //   moreButton.disabled = true;
+            //   // If the user has used the legend checkboxes, set them all to TRUE
+            //   // before displaying the next page of results.
+            //   myMapApp.setCheckedPlaceTrue();
+            //   // Get the next page of results.
+            //   pagination.nextPage();
+            // });
         }
       } else {
           // error connecting to Google Maps
@@ -449,11 +473,19 @@ myMapApp.viewModel = function() {
       myMapApp.marker = marker;
       // display the infowindow
       var infoContent = "<a>" + placeName + "</a>" + '<br>' + placeAddress
-        + '<br>' + placeTypeString + '<br>' + photoURL + '<br>' +
-        '<button id="wiki" onclick="myMapApp.displayWikiArticles()">Wiki Articles</button>';
+        + '<br>' + placeTypeString + '<br>' + photoURL + '<br>';
+        //+ '<br>' + placeTypeString + '<br>' + photoURL + '<br>' +
+        //'<button id="wiki" data-bind="enable: wikiEnable, click: myMapApp.displayWikiArticles">Wiki Articles</button>';
+        //'<button id="wiki" onclick="myMapApp.displayWikiArticles()">Wiki Articles</button>';
       myMapApp.infoContent = infoContent;
       myMapApp.infowindow.setContent(infoContent);
       myMapApp.infowindow.open(myMapApp.map, marker);
+
+      // var button = document.createElement("div");
+      // button.innerHTML = '<button id="wiki" data-bind="enable: wikiEnable, click: myMapApp.displayWikiArticles">Wiki Articles</button>';
+      // ko.applyBindings(new myMapApp.viewModel(), button);
+      //ko.applyBindings(new myMapApp.viewModel());
+      //ko.applyBindings(new infoContent);
       // pan to the marker selected
       myMapApp.map.panTo(marker.position);
       // adjust the position to allow the inforWindow to fit in smaller screens
@@ -468,11 +500,14 @@ myMapApp.viewModel = function() {
       // set the marker animation
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){marker.setAnimation(null);}, 1450);
+      // display the Wiki articles.
+      myMapApp.displayWikiArticles();
     };
 
 
     // display any wiki articles on the given location
     myMapApp.displayWikiArticles = function () {
+      console.log("displayWikiArticles");
       var wikiArticles = [];
       var searchString = myMapApp.marker.title;
       var wikiURL =   'http://en.wikipedia.org/w/api.php?action=opensearch&search=' + searchString +
@@ -506,6 +541,7 @@ myMapApp.viewModel = function() {
               // once the wiki articles have been displayed, disable the button
               var wikiButton = document.getElementById('wiki');
               wikiButton.disabled = true;
+              //wikiEnable(false);
           },
           // process any error with the wiki ajax request
           error: function (request, status, error) {
@@ -533,7 +569,7 @@ myMapApp.viewModel = function() {
 };
 
 // apply knockout bindings to the view model
-$(function(){
-  ko.applyBindings(new myMapApp.viewModel());
-});
+// $(function(){
+//   ko.applyBindings(new myMapApp.viewModel());
+// });
 
