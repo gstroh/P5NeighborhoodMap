@@ -5,7 +5,7 @@ The purpose of this project is to create an application to display a neighborhoo
 To get started, check out the repository to inspect the code and check out the deployed application on gh-pages:
 
 * [Github code repository](https://github.com/gstroh/P5NeighborhoodMap)
-* [Deployed application on gh-pages](http://gstroh.github.io/P5NeighborhoodMap/)
+* [Deployed application on gh-pages](http://gstroh.github.io/P5NeighborhoodMap)
 * To start the application locally, run this file: dist/index.html
 
 ### The Jerusalem Map

@@ -372,6 +372,7 @@ myMapApp.viewModel = function() {
         // Get flickr data with async call.
         // If successful, parse the data and store in an array to display.
         // If fails, notify user.
+        var flickrError = 0;
         $.getJSON(searchUrl)
             .done(function(data) {
                 if (data.photos.photo.length > 0) {
@@ -380,9 +381,13 @@ myMapApp.viewModel = function() {
                 }
             })
             .fail(function(jqxhr, textStatus, error) {
-                alert("Unable to get photos from Flickr at this time.");
+                flickrError++;
                 console.log("Failed to getFlickrPhotos, error = ", error);
             });
+            // Alert the user of the error only once.  GS 3/29/16
+            if (flickrError > 0) {
+                alert("Unable to get photos from Flickr at this time.");
+            }
 
 
         // get Flickr image html URL
@@ -524,7 +529,7 @@ myMapApp.viewModel = function() {
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() {
             marker.setAnimation(null);
-        }, 1450);
+        }, 1400);
         // display the Wiki articles.
         myMapApp.displayWikiArticles();
     };
